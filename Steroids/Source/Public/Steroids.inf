@@ -1,0 +1,77 @@
+;
+; Steroids.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=System ; TODO: specify appropriate Class
+ClassGuid={4d36e97d-e325-11ce-bfc1-08002be10318} ; TODO: specify appropriate ClassGuid
+Provider=%ManufacturerName%
+CatalogFile=Steroids.cat
+DriverVer= ; TODO: set DriverVer in stampinf property pages
+PnpLockdown=1
+
+[DestinationDirs]
+DefaultDestDir = 12
+Steroids_Device_CoInstaller_CopyFiles = 11
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+Steroids.sys  = 1,,
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+%Steroids.DeviceDesc%=Steroids_Device, Root\Steroids ; TODO: edit hw-id
+
+[Steroids_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+Steroids.sys
+
+;-------------- Service installation
+[Steroids_Device.NT.Services]
+AddService = Steroids,%SPSVCINST_ASSOCSERVICE%, Steroids_Service_Inst
+
+; -------------- Steroids driver install sections
+[Steroids_Service_Inst]
+DisplayName    = %Steroids.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\Steroids.sys
+
+;
+;--- Steroids_Device Coinstaller installation ------
+;
+
+[Steroids_Device.NT.CoInstallers]
+AddReg=Steroids_Device_CoInstaller_AddReg
+CopyFiles=Steroids_Device_CoInstaller_CopyFiles
+
+[Steroids_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[Steroids_Device_CoInstaller_CopyFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
+[Steroids_Device.NT.Wdf]
+KmdfService =  Steroids, Steroids_wdfsect
+[Steroids_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="<Your manufacturer name>" ;TODO: Replace with your manufacturer name
+DiskName = "Steroids Installation Disk"
+Steroids.DeviceDesc = "Steroids Device"
+Steroids.SVCDESC = "Steroids Service"

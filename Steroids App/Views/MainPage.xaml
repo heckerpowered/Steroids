@@ -1,0 +1,18 @@
+﻿<Page
+    x:Class="Steroids_App.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Steroids_App"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    mc:Ignorable="d"
+    muxc:BackdropMaterial.ApplyToRootOrPageBackground="True">
+    <NavigationView ItemInvoked="ItemInvoked" AlwaysShowHeader="True" Name="Navigator" Header="Steroids" SelectedItem="HomePage">
+        <NavigationView.MenuItems>
+            <NavigationViewItem Content="主页" Tag="主页" Name="HomePage" Icon="Home"/>
+        </NavigationView.MenuItems>
+        <Frame Name="ContentFrame">
+        </Frame>
+    </NavigationView>
+</Page>

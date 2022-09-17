@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source">
+      <UniqueIdentifier>{6d4c49f7-8994-4d60-a339-b1d358c64b60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Private">
+      <UniqueIdentifier>{8E41214B-6785-4CFE-B992-037D68949A14}</UniqueIdentifier>
+      <Extensions>inf;inv;inx;mof;mc;</Extensions>
+    </Filter>
+    <Filter Include="Source\Public">
+      <UniqueIdentifier>{41befa1f-a4ca-47aa-b3b1-cf81b27e8226}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Public\Utilities">
+      <UniqueIdentifier>{b54e11b8-77b6-40e1-9c93-4df72b8dddb8}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Source\Public\Steroids.inf">
+      <Filter>Source\Public</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="DriverEntry.cpp">
+      <Filter>Source\Private</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="DriverEntry.hpp">
+      <Filter>Source\Public</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities.hpp">
+      <Filter>Source\Public\Utilities</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
