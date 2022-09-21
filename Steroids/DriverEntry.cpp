@@ -3,10 +3,12 @@
 * Licensed under the MIT license.
 */
 
+#include "pch.hpp"
 #include "DriverEntry.hpp"
 
 #if defined(ALLOC_PRAGMA)
 #pragma alloc_text(INIT, DriverEntry)
+#pragma alloc_text(INIT, DriverUnload)
 #endif
 
 _Use_decl_annotations_
@@ -33,9 +35,10 @@ DriverEntry(
 }
 
 _Use_decl_annotations_
+extern "C"
 void
 DriverUnload(
     struct _DRIVER_OBJECT* DriverObject [[maybe_unused]]
 ) {
-
+    
 }

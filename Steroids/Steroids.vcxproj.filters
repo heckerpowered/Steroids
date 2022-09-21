@@ -11,8 +11,11 @@
     <Filter Include="Source\Public">
       <UniqueIdentifier>{41befa1f-a4ca-47aa-b3b1-cf81b27e8226}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Public\Utilities">
-      <UniqueIdentifier>{b54e11b8-77b6-40e1-9c93-4df72b8dddb8}</UniqueIdentifier>
+    <Filter Include="Source\Public\Bootstrap">
+      <UniqueIdentifier>{21c55f15-9118-48b9-baf2-dcd4d0e2b027}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Private\Bootstrap">
+      <UniqueIdentifier>{4beca795-c14f-40d4-96c1-efad84047353}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -24,13 +27,19 @@
     <ClCompile Include="DriverEntry.cpp">
       <Filter>Source\Private</Filter>
     </ClCompile>
+    <ClCompile Include="Bootstrap.cpp">
+      <Filter>Source\Private\Bootstrap</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DriverEntry.hpp">
       <Filter>Source\Public</Filter>
     </ClInclude>
-    <ClInclude Include="Utilities.hpp">
-      <Filter>Source\Public\Utilities</Filter>
+    <ClInclude Include="Bootsrap.hpp">
+      <Filter>Source\Public\Bootstrap</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.hpp">
+      <Filter>Source\Public</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

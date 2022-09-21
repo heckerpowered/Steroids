@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 
 using SteamworksSharp;
 using SteamworksSharp.Native;
@@ -24,28 +23,25 @@ namespace SteroidsApp.Views
 
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
-            Task.Run(() =>
+            try
             {
-                try
+                SteamNative.Initialize();
+                SteamApi.Initialize(381210);
+            }
+            catch (Exception exception)
+            {
+                var dialog = new ContentDialog
                 {
-                    SteamNative.Initialize();
-                    SteamApi.Initialize(381210);
-                }
-                catch (Exception exception)
-                {
-                    var dialog = new ContentDialog
-                    {
-                        XamlRoot = XamlRoot,
-                        Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style,
-                        Title = "Pretty good job so far",
-                        PrimaryButtonText = "",
-                        SecondaryButtonText = "Don't Save",
-                        CloseButtonText = "Cancel",
-                        DefaultButton = ContentDialogButton.Primary,
-                        Content = exception.ToString()
-                    };
-                }
-            });
+                    XamlRoot = XamlRoot,
+                    Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style,
+                    Title = "Pretty good job so far",
+                    CloseButtonText = "Ok",
+                    DefaultButton = ContentDialogButton.Primary,
+                    Content = exception.ToString()
+                };
+
+                _ = dialog.ShowAsync();
+            }
         }
     }
 }

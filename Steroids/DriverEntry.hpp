@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <ntddk.h>
-
 //
 // DriverEntry Routine:
 // 
@@ -59,7 +57,7 @@
 // 
 //
 
-extern "C" 
-DRIVER_INITIALIZE DriverEntry;
-
-DRIVER_UNLOAD DriverUnload;
+extern "C" {
+	DRIVER_INITIALIZE DriverEntry;
+	DRIVER_UNLOAD DriverUnload;
+}
