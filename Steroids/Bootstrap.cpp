@@ -11,7 +11,7 @@ PDEVICE_OBJECT DeviceObject;
 _Use_decl_annotations_
 extern "C"
 NTSTATUS const
-SetroidsInitialize(
+SteroidsInitialize(
 	struct _DRIVER_OBJECT* DriverObject
 ) noexcept {
 	ASSERT(DriverObject != nullptr);
@@ -58,4 +58,11 @@ SteroidsFinalize() noexcept {
 	{
 		KeLowerIrql(PASSIVE_LEVEL);
 	}
+
+	UNICODE_STRING symbolicLinkName = RTL_CONSTANT_STRING(L"\\??\\Mixin");
+	NTSTATUS const status = IoDeleteSymbolicLink(&symbolicLinkName);
+
+	ASSERT(NT_SUCCESS(status));
+
+	IoDeleteDevice(DeviceObject);
 }

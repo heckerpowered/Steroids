@@ -5,7 +5,7 @@ _Must_inspect_result_
 extern "C"
 [[nodiscard]]
 NTSTATUS const
-SetroidsInitialize(
+SteroidsInitialize(
 	_In_ _Notnull_ struct _DRIVER_OBJECT* DriverObject
 ) noexcept;
 

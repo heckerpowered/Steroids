@@ -21,12 +21,21 @@
 
 #include "Steroids Core.hpp"
 
+HANDLE SteroidsHandle;
+
 bool DllMain(HMODULE const module, std::uint32_t const callReason, void* reserved [[maybe_unused]] ) noexcept {
 	DisableThreadLibraryCalls(module);
 
 	return true;
 }
 
-extern "C" bool InitializeSteroids() noexcept {
+extern "C" bool RequestSteroids() noexcept {
+	if (SteroidsHandle != INVALID_HANDLE_VALUE) {
+		return true;
+	}
 
+	SteroidsHandle = CreateFileA("\\\\.\\Steroids", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+	if (SteroidsHandle == INVALID_HANDLE_VALUE) {
+		auto const serviceManager = OpenSCManagerA(nullptr, nullptr, SC_MANAGER_ALL_ACCESS);
+	}
 }

@@ -5,6 +5,7 @@
 
 #include "pch.hpp"
 #include "DriverEntry.hpp"
+#include "Bootsrap.hpp"
 
 #if defined(ALLOC_PRAGMA)
 #pragma alloc_text(INIT, DriverEntry)
@@ -15,7 +16,7 @@ _Use_decl_annotations_
 extern "C"
 NTSTATUS
 DriverEntry(
-    struct _DRIVER_OBJECT* DriverObject [[maybe_unused]],
+    struct _DRIVER_OBJECT* DriverObject,
     PUNICODE_STRING RegistryPath [[maybe_unused]]
 ) {
     PAGED_CODE();
@@ -31,6 +32,8 @@ DriverEntry(
     //
     ExInitializeDriverRuntime(DRIVER_RUNTIME_INIT_FLAGS::DrvRtPoolNxOptIn);
 
+    NTSTATUS const status = SteroidsInitialize(DriverObject);
+
     return STATUS_SUCCESS;
 }
 
@@ -40,5 +43,5 @@ void
 DriverUnload(
     struct _DRIVER_OBJECT* DriverObject [[maybe_unused]]
 ) {
-    
+    SteroidsFinalize();
 }

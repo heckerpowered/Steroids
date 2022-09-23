@@ -26,7 +26,7 @@
 
 
 namespace Steroids::Core {
-	extern "C" EXPORT bool InitializeSteroids() noexcept;
+	extern "C" EXPORT bool RequestSteroids() noexcept;
 }
 
 using namespace Steroids::Core;
