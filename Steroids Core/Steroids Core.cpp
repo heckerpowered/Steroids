@@ -18,6 +18,9 @@
  */
 #include <Windows.h>
 #include <cstdint>
+#include <string>
+#include <format>
+#include <sstream>
 
 #include "Steroids Core.hpp"
 
@@ -37,5 +40,34 @@ extern "C" bool RequestSteroids() noexcept {
 	SteroidsHandle = CreateFileA("\\\\.\\Steroids", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
 	if (SteroidsHandle == INVALID_HANDLE_VALUE) {
 		auto const serviceManager = OpenSCManagerA(nullptr, nullptr, SC_MANAGER_ALL_ACCESS);
+		if (serviceManager == nullptr) [[unlikely]] {
+			return false; 
+		}
+
+		constexpr auto serviceName = "Steroids";
+		auto service = OpenServiceA(serviceManager, serviceName,SERVICE_ALL_ACCESS);
+		if (service == nullptr) [[unlikely]] {
+			std::string buffer;
+			buffer.resize(GetCurrentDirectoryA(0, nullptr));
+			buffer.resize(GetCurrentDirectoryA(buffer.size(), buffer.data()));
+			
+			std::stringstream stream;
+			stream.str().resize(buffer.size() + 13);
+			stream << buffer << '\\' << "Steroids.sys";
+
+			service = CreateServiceA(serviceManager, serviceName, serviceName, SERVICE_ALL_ACCESS, SERVICE_KERNEL_DRIVER, SERVICE_DEMAND_START,
+				SERVICE_ERROR_IGNORE, stream.str().data(), nullptr, nullptr, nullptr, nullptr, nullptr);
+			if (service == nullptr)
+			{
+				CloseServiceHandle(serviceManager);
+				return false;
+			}
+		}
+
+		auto const status = StartServiceA(service, 0, 0);
+		SteroidsHandle = CreateFileA("\\\\.\\Steroids", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+		return status;
 	}
+
+	return true;
 }

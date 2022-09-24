@@ -27,9 +27,7 @@ DriverEntry(
 
     DriverObject->DriverUnload = DriverUnload;
 
-    //
     // Request NX Non-Paged Pool when available
-    //
     ExInitializeDriverRuntime(DRIVER_RUNTIME_INIT_FLAGS::DrvRtPoolNxOptIn);
 
     NTSTATUS const status = SteroidsInitialize(DriverObject);
