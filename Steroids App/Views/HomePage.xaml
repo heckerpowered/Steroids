@@ -10,7 +10,7 @@
     <Grid Margin="56">
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
             <ProgressRing Name="SteamBusy" IsActive="True" Width="100" Height="100"/>
-            <Button Style="{StaticResource ButtonRevealStyle}" Margin="0,12,0,0" Content="启动游戏"/>
+            <Button Style="{StaticResource ButtonRevealStyle}" Margin="0,12,0,0" Content="Launch Steroids"/>
         </StackPanel>
     </Grid>
 </Page>
