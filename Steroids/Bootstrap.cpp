@@ -2,8 +2,7 @@
 #include "Bootsrap.hpp"
 
 #if defined(ALLOC_PRAGMA)
-#pragma alloc_text(INIT, SetroidsInitialize)
-#pragma alloc_text(INIT, SteroidsFinalize)
+#pragma alloc_text(INIT, SteroidsInitialize)
 #endif
 
 PDEVICE_OBJECT DeviceObject;
@@ -14,10 +13,10 @@ NTSTATUS const
 SteroidsInitialize(
 	struct _DRIVER_OBJECT* DriverObject
 ) noexcept {
-	ASSERT(DriverObject != nullptr);
+	ASSERT(DriverObject != nullptr && MmIsAddressValid(DriverObject));
 	ASSERT(KeGetCurrentIrql() <= PASSIVE_LEVEL);
 
-	if (DriverObject == nullptr) [[unlikely]] {
+	if (DriverObject == nullptr || !MmIsAddressValid(DriverObject)) [[unlikely]] {
 		return STATUS_INVALID_PARAMETER;
 	}
 
@@ -33,7 +32,7 @@ SteroidsInitialize(
 		return status;
 	}
 
-	UNICODE_STRING symbolicLinkName = RTL_CONSTANT_STRING(L"\\??\\Mixin");
+	UNICODE_STRING symbolicLinkName = RTL_CONSTANT_STRING(L"\\??\\Steroids");
 	status = IoCreateSymbolicLink(&symbolicLinkName, &deviceName);
 
 	ASSERT(NT_SUCCESS(status));
@@ -48,7 +47,6 @@ SteroidsInitialize(
 }
 
 _Use_decl_annotations_
-extern "C"
 void
 SteroidsFinalize() noexcept {
 	ASSERT(DeviceObject != nullptr);
@@ -59,8 +57,8 @@ SteroidsFinalize() noexcept {
 		KeLowerIrql(PASSIVE_LEVEL);
 	}
 
-	UNICODE_STRING symbolicLinkName = RTL_CONSTANT_STRING(L"\\??\\Mixin");
-	NTSTATUS const status = IoDeleteSymbolicLink(&symbolicLinkName);
+	UNICODE_STRING symbolicLinkName = RTL_CONSTANT_STRING(L"\\??\\Steroids");
+	[[maybe_unused]] NTSTATUS const status = IoDeleteSymbolicLink(&symbolicLinkName);
 
 	ASSERT(NT_SUCCESS(status));
 

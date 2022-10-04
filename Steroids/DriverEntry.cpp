@@ -9,7 +9,6 @@
 
 #if defined(ALLOC_PRAGMA)
 #pragma alloc_text(INIT, DriverEntry)
-#pragma alloc_text(INIT, DriverUnload)
 #endif
 
 _Use_decl_annotations_
@@ -32,11 +31,10 @@ DriverEntry(
 
     NTSTATUS const status = SteroidsInitialize(DriverObject);
 
-    return STATUS_SUCCESS;
+    return status;
 }
 
 _Use_decl_annotations_
-extern "C"
 void
 DriverUnload(
     struct _DRIVER_OBJECT* DriverObject [[maybe_unused]]

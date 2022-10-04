@@ -24,9 +24,4 @@
 #define EXPORT __declspec(dllimport)
 #endif // STEROIDS_CORE
 
-
-namespace Steroids::Core {
-	extern "C" EXPORT bool RequestSteroids() noexcept;
-}
-
-using namespace Steroids::Core;
+extern "C" __declspec(dllexport) bool RequestSteroids() noexcept;

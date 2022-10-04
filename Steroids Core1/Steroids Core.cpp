@@ -17,34 +17,40 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include <Windows.h>
+#include <cstdint>
 #include <string>
 #include <format>
 #include <sstream>
 
 #include "Steroids Core.hpp"
 
-HANDLE SteroidsHandle = INVALID_HANDLE_VALUE;
+HANDLE SteroidsHandle;
 
-extern "C" __declspec(dllexport) bool RequestSteroids() noexcept {
+bool DllMain(HMODULE const module, std::uint32_t const callReason, void* reserved [[maybe_unused]] ) noexcept {
+	DisableThreadLibraryCalls(module);
+
+	return true;
+}
+
+extern "C" bool RequestSteroids() noexcept {
 	if (SteroidsHandle != INVALID_HANDLE_VALUE) {
 		return true;
 	}
 
 	SteroidsHandle = CreateFileA("\\\\.\\Steroids", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
-	if (SteroidsHandle == INVALID_HANDLE_VALUE) [[unlikely]] {
+	if (SteroidsHandle == INVALID_HANDLE_VALUE) {
 		auto const serviceManager = OpenSCManagerA(nullptr, nullptr, SC_MANAGER_ALL_ACCESS);
 		if (serviceManager == nullptr) [[unlikely]] {
-			MessageBoxA(nullptr, "1", nullptr, MB_ICONERROR);
-			return false;
+			return false; 
 		}
 
 		constexpr auto serviceName = "Steroids";
-		auto service = OpenServiceA(serviceManager, serviceName, SERVICE_ALL_ACCESS);
+		auto service = OpenServiceA(serviceManager, serviceName,SERVICE_ALL_ACCESS);
 		if (service == nullptr) [[unlikely]] {
 			std::string buffer;
 			buffer.resize(GetCurrentDirectoryA(0, nullptr));
 			buffer.resize(GetCurrentDirectoryA(static_cast<DWORD>(buffer.size()), buffer.data()));
-
+			
 			std::stringstream stream;
 			stream.str().resize(buffer.size() + 13);
 			stream << buffer << '\\' << "Steroids.sys";
@@ -54,14 +60,13 @@ extern "C" __declspec(dllexport) bool RequestSteroids() noexcept {
 			if (service == nullptr)
 			{
 				CloseServiceHandle(serviceManager);
-				MessageBoxA(nullptr, "2", nullptr, MB_ICONERROR);
 				return false;
 			}
 		}
 
 		auto const status = StartServiceA(service, 0, 0);
 		SteroidsHandle = CreateFileA("\\\\.\\Steroids", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
-		return SteroidsHandle == INVALID_HANDLE_VALUE ? status : true;
+		return status;
 	}
 
 	return true;

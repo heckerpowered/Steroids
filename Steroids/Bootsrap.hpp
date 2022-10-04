@@ -10,8 +10,6 @@ SteroidsInitialize(
 ) noexcept;
 
 _IRQL_requires_max_(PASSIVE_LEVEL)
-_Must_inspect_result_
-extern "C"
 [[nodiscard]]
 void
 SteroidsFinalize() noexcept;
