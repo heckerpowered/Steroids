@@ -74,9 +74,11 @@ SteroidsInitialize(
 	// Initialize Altitude property
 	RtlInitUnicodeString(&CallbackRegistration.Altitude, L"0");
 
-		.ObjectType = PsProcessType,
-		.Operations = OB_OPERATION_HANDLE_CREATE | OB_OPERATION_HANDLE_DUPLICATE,
-		.PreOperation = &PreOperation,
+	OB_OPERATION_REGISTRATION OperationRegistration[]{
+		{
+			.ObjectType = PsProcessType,
+			.Operations = OB_OPERATION_HANDLE_CREATE | OB_OPERATION_HANDLE_DUPLICATE,
+			.PreOperation = &PreOperation,
 		} ,
 		{
 			.ObjectType = PsThreadType,
@@ -95,8 +97,6 @@ SteroidsInitialize(
 	if (!NT_SUCCESS(Status)) [[unlikely]] {
 		return Status;
 	}
-
-	RtlInitializeGenericTable();
 
 	return Status;
 }

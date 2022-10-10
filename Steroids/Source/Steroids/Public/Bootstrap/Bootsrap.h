@@ -25,5 +25,11 @@ OB_PREOP_CALLBACK_STATUS PreOperation(
 	_Inout_ POB_PRE_OPERATION_INFORMATION OperationInformation
 ) noexcept;
 
-/**/
-RTL_GENERIC_COMPARE_ROUTINE CompareRoutine;
+/** Given two such key values, the CompareRoutine returns GenericLessThan, GenericGreaterThan, or GenericEqual */
+RTL_AVL_COMPARE_ROUTINE CompareRoutine;
+
+/** Allocate memory for caller-supplied data plus some additional memory for use */
+RTL_AVL_ALLOCATE_ROUTINE AllocateRoutine;
+
+/** Deallocate memory for elements to be deleted from the avl table */
+RTL_AVL_FREE_ROUTINE FreeRoutine;
