@@ -99,7 +99,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <EnableModules>true</EnableModules>
       <PreprocessorDefinitions>POOL_NX_OPTIN=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.hpp</PrecompiledHeaderFile>
     </ClCompile>
     <DriverSign>
@@ -171,7 +171,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <EnableModules>true</EnableModules>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.hpp</PrecompiledHeaderFile>
     </ClCompile>
     <DriverSign>
@@ -182,16 +182,13 @@
     <FilesToPackage Include="$(TargetPath)" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Source\Public\Steroids.inf" />
+    <ClCompile Include="Source\Steroids\Private\Bootstrap\Bootstrap.cpp" />
+    <ClCompile Include="Source\Steroids\Private\DriverEntry.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Bootstrap.cpp" />
-    <ClCompile Include="DriverEntry.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Bootsrap.hpp" />
-    <ClInclude Include="DriverEntry.hpp" />
-    <ClInclude Include="pch.hpp" />
+    <ClInclude Include="Source\Steroids\Public\Bootstrap\Bootsrap.h" />
+    <ClInclude Include="Source\Steroids\Public\Core.h" />
+    <ClInclude Include="Source\Steroids\Public\DriverEntry.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

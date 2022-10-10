@@ -25,7 +25,7 @@
 
 HANDLE SteroidsHandle = INVALID_HANDLE_VALUE;
 
-extern "C" __declspec(dllexport) bool RequestSteroids() noexcept {
+extern "C" __declspec(dllexport) bool InitializeSteroids() noexcept {
 	if (SteroidsHandle != INVALID_HANDLE_VALUE) {
 		return true;
 	}
@@ -34,7 +34,6 @@ extern "C" __declspec(dllexport) bool RequestSteroids() noexcept {
 	if (SteroidsHandle == INVALID_HANDLE_VALUE) [[unlikely]] {
 		auto const serviceManager = OpenSCManagerA(nullptr, nullptr, SC_MANAGER_ALL_ACCESS);
 		if (serviceManager == nullptr) [[unlikely]] {
-			MessageBoxA(nullptr, "1", nullptr, MB_ICONERROR);
 			return false;
 		}
 
@@ -54,14 +53,13 @@ extern "C" __declspec(dllexport) bool RequestSteroids() noexcept {
 			if (service == nullptr)
 			{
 				CloseServiceHandle(serviceManager);
-				MessageBoxA(nullptr, "2", nullptr, MB_ICONERROR);
 				return false;
 			}
 		}
 
 		auto const status = StartServiceA(service, 0, 0);
 		SteroidsHandle = CreateFileA("\\\\.\\Steroids", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
-		return SteroidsHandle == INVALID_HANDLE_VALUE ? status : true;
+		return status && (SteroidsHandle != INVALID_HANDLE_VALUE);
 	}
 
 	return true;

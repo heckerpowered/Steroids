@@ -24,4 +24,4 @@
 #define EXPORT __declspec(dllimport)
 #endif // STEROIDS_CORE
 
-extern "C" __declspec(dllexport) bool RequestSteroids() noexcept;
+extern "C" __declspec(dllexport) bool InitializeSteroids() noexcept;
