@@ -8,14 +8,14 @@
 
   <Identity
     Name="2d8b14a8-3079-47b1-9511-06d7b9aaf129"
-    Publisher="CN=Hecker"
-    Version="1.0.4.0" />
+    Publisher="CN=Heckerpowered"
+    Version="1.0.7.0" />
 
   <mp:PhoneIdentity PhoneProductId="2d8b14a8-3079-47b1-9511-06d7b9aaf129" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>Steroids App</DisplayName>
-    <PublisherDisplayName>Hecker</PublisherDisplayName>
+    <PublisherDisplayName>Heckerpowered</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 

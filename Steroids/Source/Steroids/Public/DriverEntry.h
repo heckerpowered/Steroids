@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include "Core.h"
+
 //
 // DriverEntry Routine:
 // 
@@ -57,5 +59,58 @@
 // 
 //
 
+/** Driver Section Structure */
+typedef struct _LDR_DATA_TABLE_ENTRY64
+{
+	LIST_ENTRY64 InLoadOrderLinks;
+	LIST_ENTRY64 InMemoryOrderLinks;
+	LIST_ENTRY64 InInitializationOrderLinks;
+	PVOID DllBase;
+	PVOID EntryPoint;
+	ULONG SizeOfImage;
+	UNICODE_STRING FullDllName;
+	UNICODE_STRING BaseDllName;
+	ULONG Flags;
+	USHORT LoadCount;
+	USHORT TlsIndex;
+	PVOID SectionPointer;
+	ULONG CheckSum;
+	PVOID LoadedImports;
+	PVOID EntryPointActivationContext;
+	PVOID PatchInformation;
+	LIST_ENTRY64 ForwarderLinks;
+	LIST_ENTRY64 ServiceTagLinks;
+	LIST_ENTRY64 StaticLinks;
+	PVOID ContextInformation;
+	ULONG64 OriginalBase;
+	LARGE_INTEGER LoadTime;
+}*PLDR_DATA_TABLE_ENTRY64;
+
+/** Called when the driver is being loaded */
 extern "C" DRIVER_INITIALIZE DriverEntry;
+
+/** Called when the driver is being unloaded */
 DRIVER_UNLOAD DriverUnload;
+
+/* Called when the application created or closed the file */
+_Function_class_(DRIVER_DISPATCH)
+_IRQL_requires_max_(DISPATCH_LEVEL)
+_IRQL_requires_same_
+_Dispatch_type_(IRP_MJ_CREATE)
+_Dispatch_type_(IRP_MJ_CLOSE)
+NTSTATUS
+DefaultDispatcher(
+	_Inout_ _Notnull_ struct _DEVICE_OBJECT* DeviceObject [[maybe_unused]],
+	_Inout_ _Notnull_ struct _IRP* Irp
+) noexcept;
+
+/** Called when the application calls the IoDeviceControl */
+_Function_class_(DRIVER_DISPATCH)
+_IRQL_requires_max_(DISPATCH_LEVEL)
+_IRQL_requires_same_
+_Dispatch_type_(IRP_MJ_DEVICE_CONTROL)
+NTSTATUS
+DispatchDeviceControl(
+	_Inout_ _Notnull_ struct _DEVICE_OBJECT* DeviceObject [[maybe_unused]],
+	_Inout_ _Notnull_ struct _IRP* Irp
+) noexcept;

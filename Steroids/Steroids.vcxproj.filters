@@ -4,42 +4,40 @@
     <Filter Include="Source">
       <UniqueIdentifier>{6d4c49f7-8994-4d60-a339-b1d358c64b60}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Private">
+    <Filter Include="Source\Steroids">
+      <UniqueIdentifier>{daa765df-140a-4238-9090-3658ffceb8ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Steroids\Public">
+      <UniqueIdentifier>{41befa1f-a4ca-47aa-b3b1-cf81b27e8226}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Steroids\Public\Bootstrap">
+      <UniqueIdentifier>{21c55f15-9118-48b9-baf2-dcd4d0e2b027}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Steroids\Private">
       <UniqueIdentifier>{8E41214B-6785-4CFE-B992-037D68949A14}</UniqueIdentifier>
       <Extensions>inf;inv;inx;mof;mc;</Extensions>
     </Filter>
-    <Filter Include="Source\Public">
-      <UniqueIdentifier>{41befa1f-a4ca-47aa-b3b1-cf81b27e8226}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Public\Bootstrap">
-      <UniqueIdentifier>{21c55f15-9118-48b9-baf2-dcd4d0e2b027}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Private\Bootstrap">
+    <Filter Include="Source\Steroids\Private\Bootstrap">
       <UniqueIdentifier>{4beca795-c14f-40d4-96c1-efad84047353}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Source\Public\Steroids.inf">
-      <Filter>Source\Public</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="DriverEntry.cpp">
-      <Filter>Source\Private</Filter>
+    <ClCompile Include="Source\Steroids\Private\Bootstrap\Bootstrap.cpp">
+      <Filter>Source\Steroids\Private\Bootstrap</Filter>
     </ClCompile>
-    <ClCompile Include="Bootstrap.cpp">
-      <Filter>Source\Private\Bootstrap</Filter>
+    <ClCompile Include="Source\Steroids\Private\DriverEntry.cpp">
+      <Filter>Source\Steroids\Private</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DriverEntry.hpp">
-      <Filter>Source\Public</Filter>
+    <ClInclude Include="Source\Steroids\Public\Core.h">
+      <Filter>Source\Steroids\Public</Filter>
     </ClInclude>
-    <ClInclude Include="Bootsrap.hpp">
-      <Filter>Source\Public\Bootstrap</Filter>
+    <ClInclude Include="Source\Steroids\Public\DriverEntry.h">
+      <Filter>Source\Steroids\Public</Filter>
     </ClInclude>
-    <ClInclude Include="pch.hpp">
-      <Filter>Source\Public</Filter>
+    <ClInclude Include="Source\Steroids\Public\Bootstrap\Bootsrap.h">
+      <Filter>Source\Steroids\Public\Bootstrap</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
