@@ -184,11 +184,13 @@
   <ItemGroup>
     <ClCompile Include="Source\Steroids\Private\Bootstrap\Bootstrap.cpp" />
     <ClCompile Include="Source\Steroids\Private\DriverEntry.cpp" />
+    <ClCompile Include="Source\Steroids\Private\Transmit\Transmit.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Steroids\Public\Bootstrap\Bootsrap.h" />
     <ClInclude Include="Source\Steroids\Public\Core.h" />
     <ClInclude Include="Source\Steroids\Public\DriverEntry.h" />
+    <ClInclude Include="Source\Steroids\Public\Transmit\Transmit.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

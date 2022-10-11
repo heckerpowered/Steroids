@@ -6,6 +6,7 @@
 #include "..\Public\Core.h"
 #include "..\Public\DriverEntry.h"
 #include "..\Public\Bootstrap\Bootsrap.h"
+#include "..\Public\Transmit\Transmit.h"
 
 #if defined(ALLOC_PRAGMA)
 #pragma alloc_text(INIT, DriverEntry)
@@ -96,8 +97,41 @@ DispatchDeviceControl(
     struct _IRP* Irp
 ) noexcept
 {
-    // Set the Status field of the input IRP's I/O status block with an appropriate NTSTATUS, usually STATUS_SUCCESS.
-    Irp->IoStatus.Status = STATUS_SUCCESS;
+    // Get the current irp stack location
+    PIO_STACK_LOCATION IoStackLocation = IoGetCurrentIrpStackLocation(Irp);
+
+    // Get the Io control code
+    ULONG const IoControlCode = IoStackLocation->Parameters.DeviceIoControl.IoControlCode;
+
+    // Get the input buffer length
+    ULONG const InputBufferLength = IoStackLocation->Parameters.DeviceIoControl.InputBufferLength;
+
+    // Get the output buffer length, declare as a reference in order to modify
+    ULONG& OutputBufferLength = IoStackLocation->Parameters.DeviceIoControl.OutputBufferLength;
+
+    // Exract the transmit method
+    switch (IoControlCode & 3) {
+    case METHOD_BUFFERED:
+        Irp->IoStatus.Status = HandleTransmit(IoControlCode, InputBufferLength, OutputBufferLength, Irp->AssociatedIrp.SystemBuffer, Irp->AssociatedIrp.SystemBuffer);
+        break;
+
+    case METHOD_IN_DIRECT:
+    case METHOD_OUT_DIRECT:
+#pragma warning(disable: 6387) // HandleTransmit function will fail when input buffer or output buffer is null
+        Irp->IoStatus.Status = HandleTransmit(IoControlCode, InputBufferLength, OutputBufferLength, Irp->AssociatedIrp.SystemBuffer, 
+            Irp->MdlAddress ? MmGetSystemAddressForMdlSafe(Irp->MdlAddress, MM_PAGE_PRIORITY::NormalPagePriority | MdlMappingNoExecute) : nullptr);
+#pragma warning(default: 6387)
+        break;
+
+    case METHOD_NEITHER:
+        Irp->IoStatus.Status = HandleTransmit(IoControlCode, InputBufferLength, OutputBufferLength, IoStackLocation->Parameters.DeviceIoControl.Type3InputBuffer, Irp->UserBuffer);
+        break;
+
+    default:
+        // Invalid transmit method
+        Irp->IoStatus.Status = STATUS_NOT_SUPPORTED;
+        break;
+    }
 
     // Set the Information field of the input IRP's I/O status block to zero.
     Irp->IoStatus.Information = 0;

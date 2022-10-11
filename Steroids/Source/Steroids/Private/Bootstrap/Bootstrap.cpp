@@ -11,7 +11,7 @@ PDEVICE_OBJECT DeviceObject;
 HANDLE CallbackHandle;
 
 /* The table of the protected processes */
-RTL_AVL_TABLE Table;
+RTL_AVL_TABLE ProcessTable;
 
 _Use_decl_annotations_
 extern "C"
@@ -62,7 +62,7 @@ SteroidsInitialize(
 	DeviceObject->Flags |= DO_BUFFERED_IO;
 
 	// Initialize generic table
-	RtlInitializeGenericTableAvl(&Table, &CompareRoutine, &AllocateRoutine, &FreeRoutine, nullptr);
+	RtlInitializeGenericTableAvl(&ProcessTable, &CompareRoutine, &AllocateRoutine, &FreeRoutine, nullptr);
 
 	// Initialize OB_CALLBACK_REGISTRATION structure
 	OB_CALLBACK_REGISTRATION CallbackRegistration{ 
@@ -128,8 +128,8 @@ SteroidsFinalize() noexcept {
 
 _Use_decl_annotations_
 OB_PREOP_CALLBACK_STATUS PreOperation(
-	PVOID RegistrationContext, /** The context that the driver specifies as the CallBackRegistration->RegistrationContext 
-									parameter of the ObRegisterCallbacks routine. The meaning of this value is driver-defined */
+	PVOID RegistrationContext [[maybe_unused]], /** The context that the driver specifies as the CallBackRegistration->RegistrationContext parameter of 
+													the ObRegisterCallbacks routine. The meaning of this value is driver-defined */
 	POB_PRE_OPERATION_INFORMATION OperationInformation /** A pointer to an OB_PRE_OPERATION_INFORMATION structure that specifies the parameters of the handle operation */
 ) noexcept {
 	if (OperationInformation->ObjectType == *PsProcessType) {
@@ -140,7 +140,7 @@ OB_PREOP_CALLBACK_STATUS PreOperation(
 		HANDLE ProcessId = PsGetProcessId(Process);
 
 		// Determine if the process is being protected
-		if (RtlLookupElementGenericTableAvl(&Table, &ProcessId)) [[unlikely]] {
+		if (RtlLookupElementGenericTableAvl(&ProcessTable, &ProcessId)) [[unlikely]] {
 			// Clear access bits
 			OperationInformation->Parameters->CreateHandleInformation.DesiredAccess = 0;
 		}
@@ -153,7 +153,7 @@ OB_PREOP_CALLBACK_STATUS PreOperation(
 		HANDLE ProcessId = PsGetThreadProcessId(Thread);
 
 		// Determine if the process is being protected
-		if (RtlLookupElementGenericTableAvl(&Table, &ProcessId)) [[unlikely]] {
+		if (RtlLookupElementGenericTableAvl(&ProcessTable, &ProcessId)) [[unlikely]] {
 			// Clear access bits
 			OperationInformation->Parameters->CreateHandleInformation.DesiredAccess = 0;
 		}
@@ -166,7 +166,7 @@ OB_PREOP_CALLBACK_STATUS PreOperation(
 _Use_decl_annotations_
 RTL_GENERIC_COMPARE_RESULTS
 CompareRoutine(
-	struct _RTL_AVL_TABLE* Table, /** A pointer to the avl table */
+	struct _RTL_AVL_TABLE* Table [[maybe_unused]], /** A pointer to the avl table */
 	PVOID FirstStruct, /** A pointer to the first item to be compared */
 	PVOID SecondStruct /** A pointer to the second item to be compared */
 ) {
@@ -187,7 +187,7 @@ CompareRoutine(
 _Use_decl_annotations_
 PVOID
 AllocateRoutine(
-	struct _RTL_AVL_TABLE* Table, /** A pointer to the generic table */
+	struct _RTL_AVL_TABLE* Table [[maybe_unused]], /** A pointer to the generic table */
 	CLONG ByteSize /** The number of bytes to allocate */
 ) {
 	return ExAllocatePool2(POOL_FLAG_NON_PAGED, ByteSize, 'VAL');
@@ -196,7 +196,7 @@ AllocateRoutine(
 _Use_decl_annotations_
 void
 FreeRoutine(
-	struct _RTL_AVL_TABLE* Table, /** A pointer to the generic table */
+	struct _RTL_AVL_TABLE* Table [[maybe_unused]], /** A pointer to the generic table */
 	PVOID Buffer /** A pointer to the element that is being deleted */
 ) {
 	// Free memory

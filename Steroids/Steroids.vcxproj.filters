@@ -20,6 +20,12 @@
     <Filter Include="Source\Steroids\Private\Bootstrap">
       <UniqueIdentifier>{4beca795-c14f-40d4-96c1-efad84047353}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Steroids\Private\Transmit">
+      <UniqueIdentifier>{d9e48ced-50b8-4178-8e47-e7ef084784f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Steroids\Public\Transmit">
+      <UniqueIdentifier>{75cbbc5f-6014-4500-8b9a-ee06dcc8be58}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Steroids\Private\Bootstrap\Bootstrap.cpp">
@@ -27,6 +33,9 @@
     </ClCompile>
     <ClCompile Include="Source\Steroids\Private\DriverEntry.cpp">
       <Filter>Source\Steroids\Private</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Steroids\Private\Transmit\Transmit.cpp">
+      <Filter>Source\Steroids\Private\Transmit</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -38,6 +47,9 @@
     </ClInclude>
     <ClInclude Include="Source\Steroids\Public\Bootstrap\Bootsrap.h">
       <Filter>Source\Steroids\Public\Bootstrap</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Steroids\Public\Transmit\Transmit.h">
+      <Filter>Source\Steroids\Public\Transmit</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
