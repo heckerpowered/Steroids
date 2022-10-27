@@ -36,17 +36,15 @@ DriverEntry(
 
     // Initialize device in order to transmit with application
     NTSTATUS const Status = SteroidsInitialize(DriverObject);
-
-    // Ensures the device is initialized successfully
     ASSERT(NT_SUCCESS(Status));
 
-    // ASSERT macro only applicable in debug configuration
-    if (!NT_SUCCESS(Status)) {
+    // Ensures the device is initialized successfully
+    if (!NT_VERIFY(NT_SUCCESS(Status))) {
         // Returning an non-successful status code will cause the driver to be unloaded
         // even if there is no unload functionn
         return Status;
     }
-
+    
     // Set-up create major function so that the application can get the handle of the driver
     DriverObject->MajorFunction[IRP_MJ_CREATE] =
         DriverObject->MajorFunction[IRP_MJ_CLOSE] = &DefaultDispatcher;
@@ -54,16 +52,15 @@ DriverEntry(
     // Set-up device control function so that the application can transmit with the driver via IoDeviceControl function
     DriverObject->MajorFunction[IRP_MJ_DEVICE_CONTROL] = &DispatchDeviceControl;
 
-    // Ensure callback registration won't fail by modifying the flags
-    static_cast<PLDR_DATA_TABLE_ENTRY64>(DriverObject->DriverSection)->Flags |= 0x20;
-
     // The driver is loaded successfully
     return Status;
 }
 
 _Use_decl_annotations_
 void
+#pragma warning(disable: 26440) // DriverUnload cannot be declared 'noexcept'
 DriverUnload(
+#pragma warning(default: 26440)
     struct _DRIVER_OBJECT* DriverObject [[maybe_unused]]
 ) {
     // Delete symbolic link and device
@@ -75,8 +72,7 @@ NTSTATUS
 DefaultDispatcher(
     struct _DEVICE_OBJECT* DeviceObject [[maybe_unused]],
     struct _IRP* Irp
-) noexcept
-{
+) {
     // Set the Status field of the input IRP's I/O status block with an appropriate NTSTATUS, usually STATUS_SUCCESS.
     Irp->IoStatus.Status = STATUS_SUCCESS;
 
@@ -95,8 +91,7 @@ NTSTATUS
 DispatchDeviceControl(
     struct _DEVICE_OBJECT* DeviceObject [[maybe_unused]],
     struct _IRP* Irp
-) noexcept
-{
+) {
     // Get the current irp stack location
     PIO_STACK_LOCATION IoStackLocation = IoGetCurrentIrpStackLocation(Irp);
 
@@ -118,9 +113,11 @@ DispatchDeviceControl(
     case METHOD_IN_DIRECT:
     case METHOD_OUT_DIRECT:
 #pragma warning(disable: 6387) // HandleTransmit function will fail when input buffer or output buffer is null
+#pragma warning(disable: 26476)
         Irp->IoStatus.Status = HandleTransmit(IoControlCode, InputBufferLength, OutputBufferLength, Irp->AssociatedIrp.SystemBuffer, 
             Irp->MdlAddress ? MmGetSystemAddressForMdlSafe(Irp->MdlAddress, MM_PAGE_PRIORITY::NormalPagePriority | MdlMappingNoExecute) : nullptr);
 #pragma warning(default: 6387)
+#pragma warning(default: 26476)
         break;
 
     case METHOD_NEITHER:

@@ -15,7 +15,7 @@ RTL_AVL_TABLE ProcessTable;
 
 _Use_decl_annotations_
 extern "C"
-NTSTATUS const
+NTSTATUS
 SteroidsInitialize(
 	struct _DRIVER_OBJECT* DriverObject
 ) noexcept {
@@ -67,7 +67,7 @@ SteroidsInitialize(
 	// Initialize OB_CALLBACK_REGISTRATION structure
 	OB_CALLBACK_REGISTRATION CallbackRegistration{ 
 		.Version = ObGetFilterVersion(),
-		.OperationRegistrationCount = 1,
+		.OperationRegistrationCount = 2,
 		.RegistrationContext = nullptr,
 	};
 
@@ -88,6 +88,7 @@ SteroidsInitialize(
 	};
 
 	// Set-up the OperationRegistration property 
+	CallbackRegistration.OperationRegistration = static_cast<OB_OPERATION_REGISTRATION*>(OperationRegistration);
 
 	// Register object callback
 	Status = ObRegisterCallbacks(&CallbackRegistration, &CallbackHandle);
@@ -109,13 +110,13 @@ SteroidsFinalize() noexcept {
 
 	if (KeGetCurrentIrql() > PASSIVE_LEVEL) [[unlikely]]
 	{
-		KeLowerIrql(PASSIVE_LEVEL);
+		return;
 	}
 
 	UNICODE_STRING symbolicLinkName = RTL_CONSTANT_STRING(L"\\??\\Steroids");
-	[[maybe_unused]] NTSTATUS const status = IoDeleteSymbolicLink(&symbolicLinkName);
+	[[maybe_unused]] NTSTATUS const Status = IoDeleteSymbolicLink(&symbolicLinkName);
 
-	ASSERT(NT_SUCCESS(status));
+	ASSERT(NT_SUCCESS(Status));
 
 	IoDeleteDevice(DeviceObject);
 
@@ -127,7 +128,8 @@ SteroidsFinalize() noexcept {
 }
 
 _Use_decl_annotations_
-OB_PREOP_CALLBACK_STATUS PreOperation(
+OB_PREOP_CALLBACK_STATUS 
+PreOperation(
 	PVOID RegistrationContext [[maybe_unused]], /** The context that the driver specifies as the CallBackRegistration->RegistrationContext parameter of 
 													the ObRegisterCallbacks routine. The meaning of this value is driver-defined */
 	POB_PRE_OPERATION_INFORMATION OperationInformation /** A pointer to an OB_PRE_OPERATION_INFORMATION structure that specifies the parameters of the handle operation */
@@ -165,7 +167,11 @@ OB_PREOP_CALLBACK_STATUS PreOperation(
 
 _Use_decl_annotations_
 RTL_GENERIC_COMPARE_RESULTS
+#pragma warning(disable: 26429)
+#pragma warning(disable: 26440)
 CompareRoutine(
+#pragma warning(default: 26440)
+#pragma warning(default: 26429)
 	struct _RTL_AVL_TABLE* Table [[maybe_unused]], /** A pointer to the avl table */
 	PVOID FirstStruct, /** A pointer to the first item to be compared */
 	PVOID SecondStruct /** A pointer to the second item to be compared */
@@ -190,7 +196,10 @@ AllocateRoutine(
 	struct _RTL_AVL_TABLE* Table [[maybe_unused]], /** A pointer to the generic table */
 	CLONG ByteSize /** The number of bytes to allocate */
 ) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmultichar"
 	return ExAllocatePool2(POOL_FLAG_NON_PAGED, ByteSize, 'VAL');
+#pragma clang diagnostic pop
 }
 
 _Use_decl_annotations_
