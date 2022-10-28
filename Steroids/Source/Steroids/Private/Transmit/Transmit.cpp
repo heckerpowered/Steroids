@@ -1,3 +1,22 @@
+/**
+ * Copyright (C) 2022 Heckerpowered Corporation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+ * and associated documentation files (the ¡°Software¡±), to deal in the Software without
+ * restriction, including without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED ¡°AS IS¡±, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+ * BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 #include "../../Public/Transmit/Transmit.h"
 
 _Use_decl_annotations_
@@ -26,6 +45,13 @@ HandleTransmit(
 		return HandleTerminateProcess(*static_cast<HANDLE const*>(InputBuffer));
 #pragma warning(default: 28118)
 
+	case 1: // Read process memory
+		if (InputBufferLength != sizeof(ReadProcessMemoryFunction)) {
+			return STATUS_INVALID_BUFFER_SIZE;
+		}
+#pragma warning(disable: 28118) // This function will fail when irql is greater than APC_LEVEL
+		return HandleReadProcessMemory(*static_cast<ReadProcessMemoryFunction const*>(InputBuffer));
+#pragma warning(default: 28118)
 	default:
 		OutputBufferLength = 0;
 		return STATUS_ILLEGAL_FUNCTION;
@@ -64,9 +90,56 @@ HandleTerminateProcess(
 
 	// Terminate Process
 	Status = ZwTerminateProcess(ProcessHandle, 0);
-	if (!NT_SUCCESS(Status)) {
+	if (!NT_SUCCESS(Status)) [[unlikely]] {
 		NT_VERIFY(NT_SUCCESS(ZwClose(ProcessHandle)));
 	}
 
 	return Status;
+}
+
+_Use_decl_annotations_
+NTSTATUS
+HandleReadProcessMemory(
+	struct ReadProcessMemoryFunction const& Function
+) noexcept {
+	ASSERT(KeGetCurrentIrql() <= APC_LEVEL);
+
+	if (KeGetCurrentIrql() > APC_LEVEL) [[unlikely]] {
+		return STATUS_RDBSS_POST_OPERATION;
+	}
+
+	// Determine if the process with the memory that is being read is already attached
+	if (PsGetCurrentProcessId() == Function.ProcessId) {
+		return MmCopyMemory(Function.Buffer, {.VirtualAddress = Function.BaseAddress}, Function.Size, MM_COPY_MEMORY_VIRTUAL, Function.NumberOfBytesRead);
+	}
+	else {
+
+		// Lookup Process
+		PEPROCESS Process;
+		NTSTATUS const Status = PsLookupProcessByProcessId(Function.ProcessId, &Process);
+
+		// Ensures the process is looked up successfully
+		if (!NT_SUCCESS(Status)) [[unlikely]] {
+			return Status;
+		}
+
+		KAPC_STATE ApcState;
+
+		// Attaches the current thread to the address space of the target process
+		KeStackAttachProcess(Process, &ApcState);
+
+		// Note  Attaching a thread to a different process can prevent asynchronous I/O
+		// operations from completing and can potentially cause deadlocks. In general, the
+		// lines of code between the call to KeStackAttachProcess and the call to
+		// KeUnstackDetachProcess should be very simple and should not call complex
+		// routines or send IRPs to other drivers
+
+		// Get physical address of supplied virtual address
+		PHYSICAL_ADDRESS const PhysicalAddress = MmGetPhysicalAddress(Function.BaseAddress);
+
+		// Detaches the current thread from the address space of a process and restores the previous attach state
+		KeUnstackDetachProcess(&ApcState);
+
+		return MmCopyMemory(Function.Buffer, { .PhysicalAddress = PhysicalAddress }, Function.Size, MM_COPY_MEMORY_PHYSICAL, Function.NumberOfBytesRead);
+	}
 }

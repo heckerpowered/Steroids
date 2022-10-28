@@ -121,6 +121,10 @@
       <PrecompiledHeaderFile>pch.hpp</PrecompiledHeaderFile>
       <EnablePREfast>true</EnablePREfast>
       <ConformanceMode>Default</ConformanceMode>
+      <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
+      <ExternalTemplatesDiagnostics>true</ExternalTemplatesDiagnostics>
+      <DisableAnalyzeExternal>true</DisableAnalyzeExternal>
     </ClCompile>
     <DriverSign>
       <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
@@ -148,6 +152,10 @@
       <PrecompiledHeaderFile>pch.hpp</PrecompiledHeaderFile>
       <EnablePREfast>true</EnablePREfast>
       <ConformanceMode>Default</ConformanceMode>
+      <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
+      <ExternalTemplatesDiagnostics>true</ExternalTemplatesDiagnostics>
+      <DisableAnalyzeExternal>true</DisableAnalyzeExternal>
     </ClCompile>
     <DriverSign>
       <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
