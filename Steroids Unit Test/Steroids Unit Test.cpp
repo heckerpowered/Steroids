@@ -25,6 +25,8 @@ int main() {
 
 	std::cout << "Steroids Unit Test 1.0.0.0" << std::endl;
 	ReportFunction("Initialize Steroids", InitializeSteroids());
+	ReportFunction("Is Steroids Available", IsSteroidsAvailable());
+	ReportFunction("Finalize Steroids", FinalizeSteroids());
 
 	static_cast<void>(getchar());
 }

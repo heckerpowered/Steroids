@@ -28,34 +28,32 @@ HandleTransmit(
 	PVOID InputBuffer,
 	PVOID OutputBuffer
 ) noexcept {
+
 	// Ensures input buffer or output buffer is not null
-	ASSERT(InputBuffer != nullptr);
-	ASSERT(OutputBuffer != nullptr);
-
-	if (InputBuffer == nullptr || OutputBuffer == nullptr) [[unlikely]] {
-		return STATUS_INVALID_USER_BUFFER;
-	}
-
 	switch (IoGetFunctionCodeFromCtlCode(IoControlCode)) {
-	case 0: // Terminate process
-		if (InputBufferLength != sizeof(HANDLE)) [[unlikely]] {
-			return STATUS_INVALID_BUFFER_SIZE;
-		}
+	case 0: // Check is steroids available
+		REQUIRE_OUTPUTBUFFER(sizeof(bool)); // Make sure output buffer is not null 
+
+		*static_cast<bool*>(OutputBuffer) = true;
+		return STATUS_SUCCESS;
+
+	case 1: // Terminate process
+		REQUIRE_INPUTBUFFER(sizeof(HANDLE));
+
 #pragma warning(disable: 28118) // This function will fail when irql is greater than PASSIVE_LEVEL
 		return HandleTerminateProcess(*static_cast<HANDLE const*>(InputBuffer));
 #pragma warning(default: 28118)
 
-	case 1: // Read process memory
-		if (InputBufferLength != sizeof(ReadProcessMemoryFunction)) {
-			return STATUS_INVALID_BUFFER_SIZE;
-		}
+	case 2: // Read process memory
+		REQUIRE_INPUTBUFFER(sizeof(ReadProcessMemoryFunction));
+
 #pragma warning(disable: 28118) // This function will fail when irql is greater than APC_LEVEL
 		return HandleReadProcessMemory(*static_cast<ReadProcessMemoryFunction const*>(InputBuffer));
 #pragma warning(default: 28118)
 	default:
-		OutputBufferLength = 0;
 		return STATUS_ILLEGAL_FUNCTION;
 	}
+
 }
 
 _Use_decl_annotations_

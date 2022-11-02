@@ -86,3 +86,27 @@ extern "C" EXPORT bool InitializeSteroids() noexcept {
 
 	return true;
 }
+
+extern "C" EXPORT bool FinalizeSteroids() noexcept {
+	CloseHandle(SteroidsHandle);
+
+	SC_HANDLE const ServiceManager = OpenSCManagerA(nullptr, nullptr, SC_MANAGER_ALL_ACCESS);
+	if (ServiceManager == nullptr) [[unlikely]] {
+		return false;
+	}
+
+	SC_HANDLE const ServiceHandle = OpenServiceA(ServiceManager, "Steroids", SERVICE_ALL_ACCESS);
+
+	[[maybe_unused]] SERVICE_STATUS ServiceStatus;
+
+	return ControlService(ServiceHandle, SERVICE_CONTROL_STOP, &ServiceStatus) &&
+		DeleteService(ServiceHandle) &&
+		CloseServiceHandle(ServiceHandle) &&
+		CloseServiceHandle(ServiceManager);
+}
+
+extern "C" EXPORT bool IsSteroidsAvailable() noexcept {
+	bool SteroidsAvailable{};
+	DeviceIoControl(SteroidsHandle, CTL_CODE(FILE_DEVICE_UNKNOWN, 0, METHOD_IN_DIRECT, FILE_ANY_ACCESS), nullptr, 0, &SteroidsAvailable, sizeof(bool), nullptr, nullptr);
+	return SteroidsAvailable;
+}

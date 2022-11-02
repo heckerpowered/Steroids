@@ -21,6 +21,10 @@
 
 #include "../../Source/Core/Public/Core.h"
 
+#define REQUIRE_INPUTBUFFER(INPUT_BUFFER_LENGTH) if (InputBuffer == nullptr) [[unlikely]] { return STATUS_INVALID_USER_BUFFER; } if(InputBufferLength != INPUT_BUFFER_LENGTH) [[unlikely]] { return STATUS_INVALID_BUFFER_SIZE; }
+#define REQUIRE_OUTPUTBUFFER(OUTPUT_BUFFER_LENGTH) if (OutputBuffer == nullptr) [[unlikely]] { return STATUS_INVALID_USER_BUFFER; } if(OutputBufferLength != OUTPUT_BUFFER_LENGTH) [[unlikely]] { return STATUS_INVALID_BUFFER_SIZE; } OutputBufferLength = OUTPUT_BUFFER_LENGTH;
+#define REQUIRE_INOUTBUFFER(INPUT_BUFFER_LENGTH, OUTPUT_BUFFER_LENGTH) if (InputBuffer == nullptr || OutputBuffer == nullptr) [[unlikely]] { return STATUS_INVALID_USER_BUFFER; } if(InputBufferLength != INPUT_BUFFER_LENGTH || OutputBufferLength != OUTPUT_BUFFER_LENGTH) [[unlikely]] { return STATUS_INVALID_BUFFER_SIZE; } OutputBufferLength = OUTPUT_BUFFER_LENGTH;
+
 /** Handle transmit, this function is called when application calls IoDeviceControl */
 _Must_inspect_result_
 _Function_class_(DRIVER_DISPATCH)
