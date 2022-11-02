@@ -26,6 +26,24 @@
     <Filter Include="Source\Steroids\Public\Transmit">
       <UniqueIdentifier>{75cbbc5f-6014-4500-8b9a-ee06dcc8be58}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Utility">
+      <UniqueIdentifier>{f0f183cf-f082-4b6c-9af4-80fc73adbfc1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Utility\AVLTree">
+      <UniqueIdentifier>{aebaa34c-a3c2-4666-82b3-54b3556ac228}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Utility\AVLTree\Private">
+      <UniqueIdentifier>{c4a48899-9529-4431-b532-ba185633dd1a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Utility\AVLTree\Public">
+      <UniqueIdentifier>{2ee10802-adba-4c5d-bebd-aa98c87d1c86}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Core">
+      <UniqueIdentifier>{94d15ae1-88b8-4b1c-8665-cb99c2c1b915}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Core\Public">
+      <UniqueIdentifier>{a6c362cf-0c33-4a0b-818b-4222d619d59c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Steroids\Private\Bootstrap\Bootstrap.cpp">
@@ -37,11 +55,11 @@
     <ClCompile Include="Source\Steroids\Private\Transmit\Transmit.cpp">
       <Filter>Source\Steroids\Private\Transmit</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Utility\AVLTree\Private\AVLTree.cpp">
+      <Filter>Source\Utility\AVLTree\Private</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\Steroids\Public\Core.h">
-      <Filter>Source\Steroids\Public</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Steroids\Public\DriverEntry.h">
       <Filter>Source\Steroids\Public</Filter>
     </ClInclude>
@@ -50,6 +68,12 @@
     </ClInclude>
     <ClInclude Include="Source\Steroids\Public\Transmit\Transmit.h">
       <Filter>Source\Steroids\Public\Transmit</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utility\AVLTree\Public\AVLTree.h">
+      <Filter>Source\Utility\AVLTree\Public</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Core\Public\Core.h">
+      <Filter>Source\Core\Public</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

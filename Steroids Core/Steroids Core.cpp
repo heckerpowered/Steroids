@@ -47,7 +47,7 @@ struct ReadProcessMemoryFunction {
 
 HANDLE SteroidsHandle = INVALID_HANDLE_VALUE;
 
-bool InitializeSteroids() noexcept {
+extern "C" EXPORT bool InitializeSteroids() noexcept {
 	if (SteroidsHandle != INVALID_HANDLE_VALUE) {
 		return true;
 	}
@@ -85,12 +85,4 @@ bool InitializeSteroids() noexcept {
 	}
 
 	return true;
-}
-
-bool SteroidsReadProcessMemory() noexcept
-{
-	if (SteroidsHandle == INVALID_HANDLE_VALUE) {
-		return false;
-	}
-
 }

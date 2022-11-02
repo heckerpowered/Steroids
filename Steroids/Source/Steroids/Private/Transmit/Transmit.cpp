@@ -110,6 +110,7 @@ HandleReadProcessMemory(
 
 	// Determine if the process with the memory that is being read is already attached
 	if (PsGetCurrentProcessId() == Function.ProcessId) {
+		// TODO:
 		return MmCopyMemory(Function.Buffer, {.VirtualAddress = Function.BaseAddress}, Function.Size, MM_COPY_MEMORY_VIRTUAL, Function.NumberOfBytesRead);
 	}
 	else {

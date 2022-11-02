@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "../Core.h"
+#include "../../Source/Core/Public/Core.h"
 
 /** Handle transmit, this function is called when application calls IoDeviceControl */
 _Must_inspect_result_

@@ -17,8 +17,8 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "../../Public/Core.h"
 #include "../../Public/Bootstrap/Bootsrap.h"
+#include "../../Source/Utility/AVLTree/Public/AVLTree.h"
 
 #if defined(ALLOC_PRAGMA)
 #pragma alloc_text(INIT, SteroidsInitialize)
@@ -27,6 +27,7 @@
 /** The device object */
 PDEVICE_OBJECT DeviceObject;
 
+/** Object callback handle */
 HANDLE CallbackHandle;
 
 /* The table of the protected processes */
@@ -38,21 +39,6 @@ NTSTATUS
 SteroidsInitialize(
 	struct _DRIVER_OBJECT* DriverObject
 ) noexcept {
-	// Ensure Driver Object is not null and valid
-	ASSERT(DriverObject != nullptr && MmIsAddressValid(DriverObject));
-
-	// Ensure current irql is less than or equal to passive level
-	ASSERT(KeGetCurrentIrql() <= PASSIVE_LEVEL);
-
-	// ASSERT macro only applicable in debug configuration
-	if (DriverObject == nullptr || !MmIsAddressValid(DriverObject)) [[unlikely]] {
-		return STATUS_INVALID_PARAMETER;
-	}
-
-	if (KeGetCurrentIrql() > PASSIVE_LEVEL) [[unlikely]] {
-		return IRQL_NOT_LESS_OR_EQUAL;
-	}
-
 	// Initialize device name
 	UNICODE_STRING DeviceName = RTL_CONSTANT_STRING(L"\\Device\\Steroids");
 
@@ -60,7 +46,7 @@ SteroidsInitialize(
 	NTSTATUS Status = IoCreateDevice(DriverObject, 0, &DeviceName, FILE_DEVICE_UNKNOWN, FILE_DEVICE_SECURE_OPEN, false, &DeviceObject);
 
 	// Ensure the device is initialized successfully
-	ASSERT(NT_SUCCESS(Status));
+	ASSERT(NT_SUCCESS(Status) /** IoCreateDevice */);
 	if (!NT_SUCCESS(Status)) [[unlikely]] {
 		return Status;
 	}
@@ -72,8 +58,9 @@ SteroidsInitialize(
 	Status = IoCreateSymbolicLink(&SymbolicLinkName, &DeviceName);
 
 	// Ensures the symbolic link is created successfully
-	ASSERT(NT_SUCCESS(Status));
+	ASSERT(NT_SUCCESS(Status) /** IoCreateSymbolicLink */);
 	if (!NT_SUCCESS(Status)) [[unlikely]] {
+		IoDeleteDevice(DeviceObject);
 		return Status;
 	}
 
@@ -113,8 +100,10 @@ SteroidsInitialize(
 	Status = ObRegisterCallbacks(&CallbackRegistration, &CallbackHandle);
 
 	// Ensures the callback is registered successfully
-	ASSERT(NT_SUCCESS(Status));
+	ASSERT(NT_SUCCESS(Status) /** ObRegisterCallbacks */);
 	if (!NT_SUCCESS(Status)) [[unlikely]] {
+		NT_VERIFY(NT_SUCCESS(IoDeleteSymbolicLink(&SymbolicLinkName)));
+		IoDeleteDevice(DeviceObject);
 		return Status;
 	}
 
@@ -132,10 +121,10 @@ SteroidsFinalize() noexcept {
 		return;
 	}
 
-	UNICODE_STRING symbolicLinkName = RTL_CONSTANT_STRING(L"\\??\\Steroids");
-	[[maybe_unused]] NTSTATUS const Status = IoDeleteSymbolicLink(&symbolicLinkName);
+	UNICODE_STRING SymbolicLinkName = RTL_CONSTANT_STRING(L"\\??\\Steroids");
+	[[maybe_unused]] NTSTATUS const Status = IoDeleteSymbolicLink(&SymbolicLinkName);
 
-	ASSERT(NT_SUCCESS(Status));
+	ASSERT(NT_SUCCESS(Status) /** IoDeleteSymbolicLink */);
 
 	IoDeleteDevice(DeviceObject);
 

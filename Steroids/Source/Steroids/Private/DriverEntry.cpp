@@ -17,7 +17,6 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "..\Public\Core.h"
 #include "..\Public\DriverEntry.h"
 #include "..\Public\Bootstrap\Bootsrap.h"
 #include "..\Public\Transmit\Transmit.h"
@@ -48,12 +47,25 @@ DriverEntry(
     // Request NX Non-Paged Pool when available
     ExInitializeDriverRuntime(DRIVER_RUNTIME_INIT_FLAGS::DrvRtPoolNxOptIn);
 
+#pragma warning(disable: 28175) // We have to modify flags in Driver Section to make sure that 
+                                // we can register object callbacks without certificates
+    // Get Driver Section
+    PLDR_DATA_TABLE_ENTRY64 DriverSection = static_cast<PLDR_DATA_TABLE_ENTRY64>(DriverObject->DriverSection);
+#pragma warning(default: 28175)
+
+    ULONG const PreviousFlag = DriverSection->Flags;
+
+    // Make sure that Object callback registration won't fail
+    DriverSection->Flags |= 0x20;
+
     // Initialize device in order to transmit with application
     NTSTATUS const Status = SteroidsInitialize(DriverObject);
-    ASSERT(NT_SUCCESS(Status));
+
+    // Restore flags to previous flags
+    DriverSection->Flags = PreviousFlag;
 
     // Ensures the device is initialized successfully
-    if (!NT_VERIFY(NT_SUCCESS(Status))) {
+    if (!NT_VERIFY(NT_SUCCESS(Status) /** SteroidsInitialize */)) {
         // Returning an non-successful status code will cause the driver to be unloaded
         // even if there is no unload functionn
         return Status;
