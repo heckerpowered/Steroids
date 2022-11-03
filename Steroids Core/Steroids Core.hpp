@@ -24,6 +24,29 @@
 #define EXPORT __declspec(dllimport)
 #endif // STEROIDS_CORE
 
+using SProcessId = std::uint64_t;
+
 extern "C" EXPORT bool InitializeSteroids() noexcept;
 extern "C" EXPORT bool IsSteroidsAvailable() noexcept;
 extern "C" EXPORT bool FinalizeSteroids() noexcept;
+
+
+extern "C" EXPORT bool SReadProcessMemory(
+	/** An id to the process with the memory that is being read */
+	SProcessId const ProcessId,
+
+	/** A pointer to the base address in the specified process from which to read.
+		Before any data transfer occurs, the system verifies that all data in the
+		base address and memory of the specified size is accessible for read access,
+		and if it is not accessible the function fails */
+	PVOID const BaseAddress, 
+
+	/** A pointer to a buffer that receives the contents from the address space of the specified process */
+	PVOID Buffer,
+
+	/** The number of bytes to be read from the specified process */
+	SIZE_T Size,
+	
+	/** A pointer to a variable that receives the number of bytes transferred into the specified buffer,
+		If NumberOfBytesRead is null, the parameter is ignored */
+	SIZE_T* NumberOfBytesRead) noexcept;

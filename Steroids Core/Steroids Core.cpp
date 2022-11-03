@@ -26,7 +26,7 @@
 _Struct_size_bytes_(sizeof(ReadProcessMemoryFunction))
 struct ReadProcessMemoryFunction {
 	/** An id to the process with the memory that is being read */
-	HANDLE ProcessId;
+	SProcessId ProcessId;
 
 	/** A pointer to the base address in the specified process from which to read.
 		Before any data transfer occurs, the system verifies that all data in the
@@ -103,6 +103,12 @@ extern "C" EXPORT bool FinalizeSteroids() noexcept {
 		DeleteService(ServiceHandle) &&
 		CloseServiceHandle(ServiceHandle) &&
 		CloseServiceHandle(ServiceManager);
+}
+
+extern "C" EXPORT bool SReadProcessMemory(SProcessId const ProcessId, PVOID const BaseAddress, PVOID Buffer, SIZE_T Size, SIZE_T* NumberOfBytesRead) noexcept
+{
+	ReadProcessMemoryFunction Function{ .ProcessId = ProcessId, .BaseAddress = BaseAddress, .Buffer = Buffer, .Size = Size, .NumberOfBytesRead = NumberOfBytesRead };
+	return DeviceIoControl(SteroidsHandle, CTL_CODE(FILE_DEVICE_UNKNOWN, 2, METHOD_IN_DIRECT, FILE_ANY_ACCESS), &Function, sizeof(ReadProcessMemoryFunction), nullptr, 0, nullptr, nullptr);
 }
 
 extern "C" EXPORT bool IsSteroidsAvailable() noexcept {

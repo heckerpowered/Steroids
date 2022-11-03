@@ -146,7 +146,30 @@ DispatchDeviceControl(
 #pragma warning(default: 26476)
         break;
 
+
     case METHOD_NEITHER:
+
+        // ProbeForWrite routine needs a irql that is less than or equal to APC_LEVEL
+        // We can't call KeLowerIrql without call KeRaiseIrql or KeRaiseIrqlToDpcLevel
+        // that means we can't check that the buffer is resides in the user-mode portion of the address space, is writable
+        // if the current irql is greater than APC_LEVEL
+        ASSERT(KeGetCurrentIrql() <= APC_LEVEL);
+        if (KeGetCurrentIrql() > APC_LEVEL) [[unlikely]] {
+            return STATUS_RDBSS_POST_OPERATION;
+        }
+
+        __try {
+            if (Irp->RequestorMode != KernelMode)
+            {
+                ProbeForWrite(IoStackLocation->Parameters.DeviceIoControl.Type3InputBuffer, InputBufferLength, sizeof(char));
+            }
+        }
+        __except (GetExceptionCode() == STATUS_ACCESS_VIOLATION || 
+            GetExceptionCode() == STATUS_DATATYPE_MISALIGNMENT ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH) {
+            Irp->IoStatus.Status = GetExceptionCode();
+            break;
+        }
+
         Irp->IoStatus.Status = HandleTransmit(IoControlCode, InputBufferLength, OutputBufferLength, IoStackLocation->Parameters.DeviceIoControl.Type3InputBuffer, Irp->UserBuffer);
         break;
 

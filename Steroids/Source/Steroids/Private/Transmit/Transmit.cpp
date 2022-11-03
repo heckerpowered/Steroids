@@ -106,10 +106,34 @@ HandleReadProcessMemory(
 		return STATUS_RDBSS_POST_OPERATION;
 	}
 
+	SIZE_T* NumberOfBytesRead;
+
+	// Determine if this parameter is null
+	if (Function.NumberOfBytesRead == nullptr) {
+		SIZE_T NumberOfBytesTransferred{};
+		NumberOfBytesRead = &NumberOfBytesTransferred;
+	}
+	else {
+		__try {
+			// Checks that the buffer resides in the user-mode portion of the address space, is writable
+			ProbeForWrite(Function.NumberOfBytesRead, sizeof(SIZE_T), TYPE_ALIGNMENT(SIZE_T*));
+
+			// The buffer is writeable
+			NumberOfBytesRead = Function.NumberOfBytesRead;
+		}
+		__except (GetExceptionCode() == STATUS_ACCESS_VIOLATION ||
+			GetExceptionCode() == STATUS_DATATYPE_MISALIGNMENT ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH) {
+			ASSERT(GetExceptionCode() != STATUS_DATATYPE_MISALIGNMENT);
+
+			SIZE_T NumberOfBytesTransferred{};
+			NumberOfBytesRead = &NumberOfBytesTransferred;
+		}
+	}
+	
 	// Determine if the process with the memory that is being read is already attached
 	if (PsGetCurrentProcessId() == Function.ProcessId) {
 		// TODO:
-		return MmCopyMemory(Function.Buffer, {.VirtualAddress = Function.BaseAddress}, Function.Size, MM_COPY_MEMORY_VIRTUAL, Function.NumberOfBytesRead);
+		return MmCopyMemory(Function.Buffer, {.VirtualAddress = Function.BaseAddress}, Function.Size, MM_COPY_MEMORY_VIRTUAL, NumberOfBytesRead);
 	}
 	else {
 
@@ -139,6 +163,6 @@ HandleReadProcessMemory(
 		// Detaches the current thread from the address space of a process and restores the previous attach state
 		KeUnstackDetachProcess(&ApcState);
 
-		return MmCopyMemory(Function.Buffer, { .PhysicalAddress = PhysicalAddress }, Function.Size, MM_COPY_MEMORY_PHYSICAL, Function.NumberOfBytesRead);
+		return MmCopyMemory(Function.Buffer, { .PhysicalAddress = PhysicalAddress }, Function.Size, MM_COPY_MEMORY_PHYSICAL, NumberOfBytesRead);
 	}
 }
