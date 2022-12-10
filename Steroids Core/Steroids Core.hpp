@@ -30,7 +30,6 @@ extern "C" EXPORT bool InitializeSteroids() noexcept;
 extern "C" EXPORT bool IsSteroidsAvailable() noexcept;
 extern "C" EXPORT bool FinalizeSteroids() noexcept;
 
-
 extern "C" EXPORT bool SReadProcessMemory(
 	/** An id to the process with the memory that is being read */
 	SProcessId const ProcessId,
@@ -50,3 +49,5 @@ extern "C" EXPORT bool SReadProcessMemory(
 	/** A pointer to a variable that receives the number of bytes transferred into the specified buffer,
 		If NumberOfBytesRead is null, the parameter is ignored */
 	SIZE_T* NumberOfBytesRead) noexcept;
+
+extern "C" EXPORT bool ProtectProcess(SProcessId ProcessId) noexcept;

@@ -17,7 +17,10 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "../../Public/Transmit/Transmit.h"
+#include "Transmit/Transmit.h"
+#include "Process/Process.h"
+#include "Bootstrap/Bootstrap.h"
+#include "Utility/Result/Result.h"
 
 _Use_decl_annotations_
 NTSTATUS
@@ -28,28 +31,35 @@ HandleTransmit(
 	PVOID InputBuffer,
 	PVOID OutputBuffer
 ) noexcept {
-
 	// Ensures input buffer or output buffer is not null
-	switch (IoGetFunctionCodeFromCtlCode(IoControlCode)) {
-	case 0: // Check is steroids available
+	switch (static_cast<SteroidsFunction>(IoGetFunctionCodeFromCtlCode(IoControlCode))) {
+	case SteroidsFunction::SteroidsAvailable: // Check is steroids available
 		REQUIRE_OUTPUTBUFFER(sizeof(bool)); // Make sure output buffer is not null 
 
 		*static_cast<bool*>(OutputBuffer) = true;
 		return STATUS_SUCCESS;
 
-	case 1: // Terminate process
+	case SteroidsFunction::TerminateProcess: // Terminate process
 		REQUIRE_INPUTBUFFER(sizeof(HANDLE));
 
-#pragma warning(disable: 28118) // This function will fail when irql is greater than PASSIVE_LEVEL
+#pragma warning(disable: 28118) //	This function will fail when irql is greater than PASSIVE_LEVEL
 		return HandleTerminateProcess(*static_cast<HANDLE const*>(InputBuffer));
 #pragma warning(default: 28118)
 
-	case 2: // Read process memory
+	case SteroidsFunction::ProtectProcess:  // Protect Process
+		REQUIRE_INPUTBUFFER(sizeof(HANDLE));
+
+		AddProtectProcess(*static_cast<HANDLE const*>(InputBuffer));
+
+		return STATUS_SUCCESS;
+
+	case SteroidsFunction::ReadProcessMemory: // Read process memory
 		REQUIRE_INPUTBUFFER(sizeof(ReadProcessMemoryFunction));
 
 #pragma warning(disable: 28118) // This function will fail when irql is greater than APC_LEVEL
 		return HandleReadProcessMemory(*static_cast<ReadProcessMemoryFunction const*>(InputBuffer));
 #pragma warning(default: 28118)
+
 	default:
 		return STATUS_ILLEGAL_FUNCTION;
 	}
@@ -67,32 +77,7 @@ HandleTerminateProcess(
 		return STATUS_RDBSS_POST_OPERATION;
 	}
 
-	// Lookup Process
-	PEPROCESS Process;
-	NTSTATUS Status = PsLookupProcessByProcessId(ProcessId, &Process);
-
-	// Ensures the process is looked up successfully
-	if (!NT_SUCCESS(Status)) [[unlikely]] {
-		return Status;
-	}
-
-	// Open process handle
-	HANDLE ProcessHandle;
-	Status = ObOpenObjectByPointer(&Process, OBJ_KERNEL_HANDLE, nullptr, PROCESS_ALL_ACCESS, *PsProcessType, MODE::KernelMode, &ProcessHandle);
-
-	// Dereference process object before return
-	ObDereferenceObjectDeferDelete(Process);
-	if (!NT_SUCCESS(Status)) [[unlikely]] {
-		return Status;
-	}
-
-	// Terminate Process
-	Status = ZwTerminateProcess(ProcessHandle, 0);
-	if (!NT_SUCCESS(Status)) [[unlikely]] {
-		NT_VERIFY(NT_SUCCESS(ZwClose(ProcessHandle)));
-	}
-
-	return Status;
+	return Process::GetProcessById(ProcessId).IfSuccess([](Process& Process) { Process.Terminate(); });
 }
 
 _Use_decl_annotations_

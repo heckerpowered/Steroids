@@ -85,6 +85,9 @@
     </ClangTidyChecks>
     <AllProjectIncludesArePublic>true</AllProjectIncludesArePublic>
     <AllProjectBMIsArePublic>true</AllProjectBMIsArePublic>
+    <IncludePath>$(VC_IncludePath);$(SolutionDir)Steroids\Source\Steroids\Public;$(IncludePath)</IncludePath>
+    <PublicIncludeDirectories>$(SolutionDir)Steroids;$(PublicIncludeDirectories)</PublicIncludeDirectories>
+    <ExternalIncludePath>$(SolutionDir)Steroids\Source\Steroids\Public;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
@@ -95,6 +98,9 @@
     </ClangTidyChecks>
     <AllProjectIncludesArePublic>true</AllProjectIncludesArePublic>
     <AllProjectBMIsArePublic>true</AllProjectBMIsArePublic>
+    <IncludePath>$(VC_IncludePath);$(SolutionDir)Steroids\Source\Steroids\Public;$(IncludePath)</IncludePath>
+    <PublicIncludeDirectories>$(SolutionDir)Steroids;$(PublicIncludeDirectories)</PublicIncludeDirectories>
+    <ExternalIncludePath>$(SolutionDir)Steroids\Source\Steroids\Public;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
@@ -102,6 +108,11 @@
     <RunCodeAnalysis>false</RunCodeAnalysis>
     <EnableMicrosoftCodeAnalysis>true</EnableMicrosoftCodeAnalysis>
     <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
+    <AllProjectIncludesArePublic>true</AllProjectIncludesArePublic>
+    <AllProjectBMIsArePublic>true</AllProjectBMIsArePublic>
+    <IncludePath>$(VC_IncludePath);$(SolutionDir)Steroids\Source\Steroids\Public;$(IncludePath)</IncludePath>
+    <PublicIncludeDirectories>$(SolutionDir)Steroids;$(PublicIncludeDirectories)</PublicIncludeDirectories>
+    <ExternalIncludePath>$(SolutionDir)Steroids\Source\Steroids\Public;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
@@ -109,6 +120,11 @@
     <RunCodeAnalysis>false</RunCodeAnalysis>
     <EnableMicrosoftCodeAnalysis>true</EnableMicrosoftCodeAnalysis>
     <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
+    <AllProjectIncludesArePublic>true</AllProjectIncludesArePublic>
+    <AllProjectBMIsArePublic>true</AllProjectBMIsArePublic>
+    <IncludePath>$(VC_IncludePath);$(SolutionDir)Steroids\Source\Steroids\Public;$(IncludePath)</IncludePath>
+    <PublicIncludeDirectories>$(SolutionDir)Steroids;$(PublicIncludeDirectories)</PublicIncludeDirectories>
+    <ExternalIncludePath>$(SolutionDir)Steroids\Source\Steroids\Public;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -220,17 +236,26 @@
     <FilesToPackage Include="$(TargetPath)" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Steroids\Private\Core\Core.cpp" />
+    <ClCompile Include="Source\Steroids\Private\Secure\CRC32\CRC32.cpp" />
+    <ClCompile Include="Source\Steroids\Private\Secure\MemoryIntegrity\MemoryIntegrity.cpp" />
     <ClCompile Include="Source\Steroids\Private\Bootstrap\Bootstrap.cpp" />
     <ClCompile Include="Source\Steroids\Private\DriverEntry.cpp" />
+    <ClCompile Include="Source\Steroids\Private\Process\Process.cpp" />
     <ClCompile Include="Source\Steroids\Private\Transmit\Transmit.cpp" />
-    <ClCompile Include="Source\Utility\AVLTree\Private\AVLTree.cpp" />
+    <ClCompile Include="Source\Steroids\Private\Utility\AVLTree\AVLTree.cpp" />
+    <ClCompile Include="Source\Steroids\Private\Utility\Result\Result.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\Core\Public\Core.h" />
-    <ClInclude Include="Source\Steroids\Public\Bootstrap\Bootsrap.h" />
+    <ClInclude Include="Source\Steroids\Public\Secure\CRC32\CRC32.h" />
+    <ClInclude Include="Source\Steroids\Public\Secure\MemoryIntegrity\MemoryIntegrity.h" />
+    <ClInclude Include="Source\Steroids\Public\Bootstrap\Bootstrap.h" />
+    <ClInclude Include="Source\Steroids\Public\Core\Core.h" />
     <ClInclude Include="Source\Steroids\Public\DriverEntry.h" />
+    <ClInclude Include="Source\Steroids\Public\Process\Process.h" />
+    <ClInclude Include="Source\Steroids\Public\Result\Result.h" />
     <ClInclude Include="Source\Steroids\Public\Transmit\Transmit.h" />
-    <ClInclude Include="Source\Utility\AVLTree\Public\AVLTree.h" />
+    <ClInclude Include="Source\Steroids\Public\Utility\AVLTree\AVLTree.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

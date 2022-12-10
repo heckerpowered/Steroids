@@ -21,14 +21,8 @@
 
 #include "Core/Core.h"
 
-/** Called when the driver is being loaded */
-extern "C" DRIVER_INITIALIZE DriverEntry;
-
-/** Called when the driver is being unloaded */
-DRIVER_UNLOAD DriverUnload;
-
-/** Called when the application created or closed the file */
-DRIVER_DISPATCH DefaultDispatcher;
-
-/** Called when the application calls the IoDeviceControl */
-DRIVER_DISPATCH DispatchDeviceControl;
+_Must_inspect_result_
+NTSTATUS
+MiCheckProcess(
+	_In_ PEPROCESS Process
+) noexcept;

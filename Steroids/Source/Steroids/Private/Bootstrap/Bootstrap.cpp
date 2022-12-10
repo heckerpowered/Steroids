@@ -17,8 +17,9 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "../../Public/Bootstrap/Bootsrap.h"
-#include "../../Source/Utility/AVLTree/Public/AVLTree.h"
+#include "Core/Core.h"
+#include "Bootstrap/Bootstrap.h"
+#include "Utility/AVLTree/AVLTree.h"
 
 #if defined(ALLOC_PRAGMA)
 #pragma alloc_text(INIT, SteroidsInitialize)
@@ -41,7 +42,7 @@ SteroidsInitialize(
 ) noexcept {
 	// Initialize device name
 	UNICODE_STRING DeviceName = RTL_CONSTANT_STRING(L"\\Device\\Steroids");
-
+	
 	// Create device
 	NTSTATUS Status = IoCreateDevice(DriverObject, 0, &DeviceName, FILE_DEVICE_UNKNOWN, FILE_DEVICE_SECURE_OPEN, false, &DeviceObject);
 
@@ -71,7 +72,7 @@ SteroidsInitialize(
 	RtlInitializeGenericTableAvl(&ProcessTable, &CompareRoutine, &AllocateRoutine, &FreeRoutine, nullptr);
 
 	// Initialize OB_CALLBACK_REGISTRATION structure
-	OB_CALLBACK_REGISTRATION CallbackRegistration{ 
+	OB_CALLBACK_REGISTRATION CallbackRegistration { 
 		.Version = ObGetFilterVersion(),
 		.OperationRegistrationCount = 2,
 		.RegistrationContext = nullptr,
@@ -107,20 +108,22 @@ SteroidsInitialize(
 		return Status;
 	}
 
+	Status = PsSetCreateProcessNotifyRoutine(&CreateProcessNotify, false);
+
+	// Ensures the callback is registered successfully
+	ASSERT(NT_SUCCESS(Status) /** PsSetCreateProcessNotifyRoutine */);
+	if (!NT_SUCCESS(Status)) [[unlikely]] {
+		NT_VERIFY(NT_SUCCESS(IoDeleteSymbolicLink(&SymbolicLinkName)));
+		IoDeleteDevice(DeviceObject);
+		return Status;
+	}
+
 	return Status;
 }
 
 _Use_decl_annotations_
 void
 SteroidsFinalize() noexcept {
-	ASSERT(DeviceObject != nullptr);
-	ASSERT(KeGetCurrentIrql() <= PASSIVE_LEVEL);
-
-	if (KeGetCurrentIrql() > PASSIVE_LEVEL) [[unlikely]]
-	{
-		return;
-	}
-
 	UNICODE_STRING SymbolicLinkName = RTL_CONSTANT_STRING(L"\\??\\Steroids");
 	[[maybe_unused]] NTSTATUS const Status = IoDeleteSymbolicLink(&SymbolicLinkName);
 
@@ -130,9 +133,11 @@ SteroidsFinalize() noexcept {
 
 	// Determines if the callback handle is null
 	// The driver may be unloaded without register callback successfully
-	if (CallbackHandle != nullptr) [[unlikely]] {
+	if (CallbackHandle) [[unlikely]] {
 		ObUnRegisterCallbacks(CallbackHandle);
 	}
+
+	NT_VERIFY(PsSetCreateProcessNotifyRoutine(&CreateProcessNotify, true));
 }
 
 _Use_decl_annotations_
@@ -171,6 +176,32 @@ PreOperation(
 
 	// We can only return success
 	return OB_PREOP_CALLBACK_STATUS::OB_PREOP_SUCCESS;
+}
+
+_Use_decl_annotations_
+void
+AddProtectProcess(
+	HANDLE ProcessId
+) noexcept {
+	static_cast<void>(RtlInsertElementGenericTableAvl(&ProcessTable, &ProcessId, sizeof(HANDLE), nullptr));
+}
+
+_Use_decl_annotations_
+void
+CreateProcessNotify(
+	HANDLE ParentId [[maybe_unused]],
+	HANDLE ProcessId,
+	BOOLEAN Create
+) noexcept {
+	// Filtering process creation operations
+	if (Create) {
+		return;
+	}
+
+	// Determine if the process is protected
+	if (RtlLookupElementGenericTableAvl(&ProcessTable, &ProcessId)) [[unlikely]] {
+		NT_VERIFY(RtlDeleteElementGenericTableAvl(&ProcessTable, &ProcessId));
+	}
 }
 
 _Use_decl_annotations_
@@ -219,3 +250,4 @@ FreeRoutine(
 	// Free memory
 	ExFreePool(Buffer);
 }
+

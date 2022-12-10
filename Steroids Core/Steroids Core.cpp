@@ -51,7 +51,7 @@ extern "C" EXPORT bool InitializeSteroids() noexcept {
 	if (SteroidsHandle != INVALID_HANDLE_VALUE) {
 		return true;
 	}
-
+	
 	SteroidsHandle = CreateFileA("\\\\.\\Steroids", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
 	if (SteroidsHandle == INVALID_HANDLE_VALUE) [[unlikely]] {
 		auto const serviceManager = OpenSCManagerA(nullptr, nullptr, SC_MANAGER_ALL_ACCESS);
@@ -109,6 +109,11 @@ extern "C" EXPORT bool SReadProcessMemory(SProcessId const ProcessId, PVOID cons
 {
 	ReadProcessMemoryFunction Function{ .ProcessId = ProcessId, .BaseAddress = BaseAddress, .Buffer = Buffer, .Size = Size, .NumberOfBytesRead = NumberOfBytesRead };
 	return DeviceIoControl(SteroidsHandle, CTL_CODE(FILE_DEVICE_UNKNOWN, 2, METHOD_IN_DIRECT, FILE_ANY_ACCESS), &Function, sizeof(ReadProcessMemoryFunction), nullptr, 0, nullptr, nullptr);
+}
+
+extern "C" EXPORT bool ProtectProcess(SProcessId ProcessId) noexcept
+{
+	return DeviceIoControl(SteroidsHandle, CTL_CODE(FILE_DEVICE_UNKNOWN, 3, METHOD_IN_DIRECT, FILE_ANY_ACCESS), &ProcessId, sizeof(ProcessId), nullptr, 0, nullptr, nullptr);;
 }
 
 extern "C" EXPORT bool IsSteroidsAvailable() noexcept {

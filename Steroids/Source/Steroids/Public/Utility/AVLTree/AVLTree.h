@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "../../Source/Core/Public/Core.h"
+#include "Core/Core.h"
 
 template<typename T>
 class AVLTree {

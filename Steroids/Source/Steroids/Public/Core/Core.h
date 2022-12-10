@@ -19,16 +19,7 @@
 
 #pragma once
 
-#include "Core/Core.h"
+#include <ntifs.h>
+#include <ntddk.h>
+#include <intrin.h>
 
-/** Called when the driver is being loaded */
-extern "C" DRIVER_INITIALIZE DriverEntry;
-
-/** Called when the driver is being unloaded */
-DRIVER_UNLOAD DriverUnload;
-
-/** Called when the application created or closed the file */
-DRIVER_DISPATCH DefaultDispatcher;
-
-/** Called when the application calls the IoDeviceControl */
-DRIVER_DISPATCH DispatchDeviceControl;

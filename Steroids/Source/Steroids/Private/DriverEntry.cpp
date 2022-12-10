@@ -17,9 +17,112 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "..\Public\DriverEntry.h"
-#include "..\Public\Bootstrap\Bootsrap.h"
-#include "..\Public\Transmit\Transmit.h"
+#include "DriverEntry.h"
+#include "Bootstrap\Bootstrap.h"
+#include "Transmit\Transmit.h"
+
+enum _LDR_HOT_PATCH_STATE
+{
+    LdrHotPatchBaseImage = 0,
+    LdrHotPatchNotApplied = 1,
+    LdrHotPatchAppliedReverse = 2,
+    LdrHotPatchAppliedForward = 3,
+    LdrHotPatchFailedToPatch = 4,
+    LdrHotPatchStateMax = 5
+};
+
+enum _LDR_DLL_LOAD_REASON
+{
+    LoadReasonStaticDependency = 0,
+    LoadReasonStaticForwarderDependency = 1,
+    LoadReasonDynamicForwarderDependency = 2,
+    LoadReasonDelayloadDependency = 3,
+    LoadReasonDynamicLoad = 4,
+    LoadReasonAsImageLoad = 5,
+    LoadReasonAsDataLoad = 6,
+    LoadReasonEnclavePrimary = 7,
+    LoadReasonEnclaveDependency = 8,
+    LoadReasonPatchImage = 9,
+    LoadReasonUnknown = -1
+};
+
+/** Driver Section Structure */
+struct _LDR_DATA_TABLE_ENTRY
+{
+    struct _LIST_ENTRY InLoadOrderLinks;
+    struct _LIST_ENTRY InMemoryOrderLinks;
+    struct _LIST_ENTRY InInitializationOrderLinks;
+    VOID* DllBase;
+    VOID* EntryPoint;
+    ULONG SizeOfImage;
+    struct _UNICODE_STRING FullDllName;
+    struct _UNICODE_STRING BaseDllName;
+    union
+    {
+        UCHAR FlagGroup[4];
+        ULONG Flags;
+        struct
+        {
+            ULONG PackagedBinary : 1;
+            ULONG MarkedForRemoval : 1;
+            ULONG ImageDll : 1;
+            ULONG LoadNotificationsSent : 1;
+            ULONG TelemetryEntryProcessed : 1;
+            ULONG ProcessStaticImport : 1;
+            ULONG InLegacyLists : 1;
+            ULONG InIndexes : 1;
+            ULONG ShimDll : 1;
+            ULONG InExceptionTable : 1;
+            ULONG ReservedFlags1 : 2;
+            ULONG LoadInProgress : 1;
+            ULONG LoadConfigProcessed : 1;
+            ULONG EntryProcessed : 1;
+            ULONG ProtectDelayLoad : 1;
+            ULONG ReservedFlags3 : 2;
+            ULONG DontCallForThreads : 1;
+            ULONG ProcessAttachCalled : 1;
+            ULONG ProcessAttachFailed : 1;
+            ULONG CorDeferredValidate : 1;
+            ULONG CorImage : 1;
+            ULONG DontRelocate : 1;
+            ULONG CorILOnly : 1;
+            ULONG ChpeImage : 1;
+            ULONG ChpeEmulatorImage : 1;
+            ULONG ReservedFlags5 : 1;
+            ULONG Redirected : 1;
+            ULONG ReservedFlags6 : 2;
+            ULONG CompatDatabaseProcessed : 1;
+#pragma warning(disable: 4201)
+        };
+    };
+#pragma warning(default: 4201)
+    USHORT ObsoleteLoadCount;
+    USHORT TlsIndex;
+    struct _LIST_ENTRY HashLinks;
+    ULONG TimeDateStamp;
+    struct _ACTIVATION_CONTEXT* EntryPointActivationContext;
+    VOID* Lock;
+    struct _LDR_DDAG_NODE* DdagNode;
+    struct _LIST_ENTRY NodeModuleLink;
+    struct _LDRP_LOAD_CONTEXT* LoadContext;
+    VOID* ParentDllBase;
+    VOID* SwitchBackContext;
+    struct _RTL_BALANCED_NODE BaseAddressIndexNode;
+    struct _RTL_BALANCED_NODE MappingInfoIndexNode;
+    ULONGLONG OriginalBase;
+    union _LARGE_INTEGER LoadTime;
+    ULONG BaseNameHashValue;
+    enum _LDR_DLL_LOAD_REASON LoadReason;
+    ULONG ImplicitPathOptions;
+    ULONG ReferenceCount;
+    ULONG DependentLoadFlags;
+    UCHAR SigningLevel;
+    ULONG CheckSum;
+    VOID* ActivePatchImageBase;
+    enum _LDR_HOT_PATCH_STATE HotPatchState;
+};
+
+using LDR_DATA_TABLE_ENTRY = _LDR_DATA_TABLE_ENTRY;
 
 #if defined(ALLOC_PRAGMA)
 #pragma alloc_text(INIT, DriverEntry)
@@ -42,7 +145,7 @@ DriverEntry(
 #endif
 
     // Set-up the unload function to make the driver able to be unload
-    DriverObject->DriverUnload = DriverUnload;
+    DriverObject->DriverUnload = &DriverUnload;
 
     // Request NX Non-Paged Pool when available
     ExInitializeDriverRuntime(DRIVER_RUNTIME_INIT_FLAGS::DrvRtPoolNxOptIn);
@@ -50,7 +153,7 @@ DriverEntry(
 #pragma warning(disable: 28175) // We have to modify flags in Driver Section to make sure that 
                                 // we can register object callbacks without certificates
     // Get Driver Section
-    PLDR_DATA_TABLE_ENTRY64 DriverSection = static_cast<PLDR_DATA_TABLE_ENTRY64>(DriverObject->DriverSection);
+    LDR_DATA_TABLE_ENTRY* DriverSection = static_cast<LDR_DATA_TABLE_ENTRY*>(DriverObject->DriverSection);
 #pragma warning(default: 28175)
 
     ULONG const PreviousFlag = DriverSection->Flags;
@@ -70,7 +173,7 @@ DriverEntry(
         // even if there is no unload functionn
         return Status;
     }
-    
+
     // Set-up create major function so that the application can get the handle of the driver
     DriverObject->MajorFunction[IRP_MJ_CREATE] =
         DriverObject->MajorFunction[IRP_MJ_CLOSE] = &DefaultDispatcher;
@@ -159,7 +262,7 @@ DispatchDeviceControl(
         }
 
         __try {
-            if (Irp->RequestorMode != KernelMode)
+            if (Irp->RequestorMode != MODE::KernelMode)
             {
                 ProbeForWrite(IoStackLocation->Parameters.DeviceIoControl.Type3InputBuffer, InputBufferLength, sizeof(char));
             }

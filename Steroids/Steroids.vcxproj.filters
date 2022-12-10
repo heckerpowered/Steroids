@@ -13,6 +13,9 @@
     <Filter Include="Source\Steroids\Public\Bootstrap">
       <UniqueIdentifier>{21c55f15-9118-48b9-baf2-dcd4d0e2b027}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Steroids\Public\Transmit">
+      <UniqueIdentifier>{75cbbc5f-6014-4500-8b9a-ee06dcc8be58}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Source\Steroids\Private">
       <UniqueIdentifier>{8E41214B-6785-4CFE-B992-037D68949A14}</UniqueIdentifier>
       <Extensions>inf;inv;inx;mof;mc;</Extensions>
@@ -23,26 +26,53 @@
     <Filter Include="Source\Steroids\Private\Transmit">
       <UniqueIdentifier>{d9e48ced-50b8-4178-8e47-e7ef084784f5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Steroids\Public\Transmit">
-      <UniqueIdentifier>{75cbbc5f-6014-4500-8b9a-ee06dcc8be58}</UniqueIdentifier>
+    <Filter Include="Source\Steroids\Public\Process">
+      <UniqueIdentifier>{1b75f7ce-7cdd-4177-bd85-948098317047}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Utility">
-      <UniqueIdentifier>{f0f183cf-f082-4b6c-9af4-80fc73adbfc1}</UniqueIdentifier>
+    <Filter Include="Source\Steroids\Private\Process">
+      <UniqueIdentifier>{f3863afa-350a-4c5b-815d-86d84679f40d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Utility\AVLTree">
-      <UniqueIdentifier>{aebaa34c-a3c2-4666-82b3-54b3556ac228}</UniqueIdentifier>
+    <Filter Include="Source\Steroids\Private\Core">
+      <UniqueIdentifier>{90932388-95de-411d-bde1-848540aac8b4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Utility\AVLTree\Private">
-      <UniqueIdentifier>{c4a48899-9529-4431-b532-ba185633dd1a}</UniqueIdentifier>
+    <Filter Include="Source\Steroids\Public\Core">
+      <UniqueIdentifier>{1ffe27a6-21cd-4172-ba55-4fff36614fb4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Utility\AVLTree\Public">
-      <UniqueIdentifier>{2ee10802-adba-4c5d-bebd-aa98c87d1c86}</UniqueIdentifier>
+    <Filter Include="Source\Steroids\Public\Utility">
+      <UniqueIdentifier>{d39754e4-12f4-4618-9f22-ee4b21018bcd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Core">
-      <UniqueIdentifier>{94d15ae1-88b8-4b1c-8665-cb99c2c1b915}</UniqueIdentifier>
+    <Filter Include="Source\Steroids\Private\Utility">
+      <UniqueIdentifier>{3c989def-d3eb-43f0-8e6a-1393223ca8a3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Core\Public">
-      <UniqueIdentifier>{a6c362cf-0c33-4a0b-818b-4222d619d59c}</UniqueIdentifier>
+    <Filter Include="Source\Steroids\Public\Utility\Result">
+      <UniqueIdentifier>{a198ea12-fef8-4f01-a661-64544d32dd2c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Steroids\Private\Utility\Result">
+      <UniqueIdentifier>{914a607b-ae4f-499c-9a44-c6ff8c5d8ef0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Steroids\Private\Utility\AVLTree">
+      <UniqueIdentifier>{9c231b41-25e6-464b-91e6-21ac0dbca1e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Steroids\Public\Utility\AVLTree">
+      <UniqueIdentifier>{7c28585e-c426-42bd-8b4a-59d718318000}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Steroids\Private\Secure">
+      <UniqueIdentifier>{a831ca19-4a63-4c24-a934-10b58b754cde}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Steroids\Public\Secure">
+      <UniqueIdentifier>{7a45ff7d-5b46-4065-bcee-dc94cd5986d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Steroids\Public\Secure\CRC32">
+      <UniqueIdentifier>{14ac71ae-11bd-4fd6-aaa3-e07ca0575987}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Steroids\Private\Secure\CRC32">
+      <UniqueIdentifier>{f1d0971f-fe1a-4309-848b-eb88491dcc4a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Steroids\Private\Secure\MemoryIntegrity">
+      <UniqueIdentifier>{4a980d92-5f92-4063-9ec8-a66f4a77d75c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Steroids\Public\Secure\MemoryIntegrity">
+      <UniqueIdentifier>{e0d424b5-86ab-4e1c-9055-25a1038d69e7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -55,25 +85,52 @@
     <ClCompile Include="Source\Steroids\Private\Transmit\Transmit.cpp">
       <Filter>Source\Steroids\Private\Transmit</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Utility\AVLTree\Private\AVLTree.cpp">
-      <Filter>Source\Utility\AVLTree\Private</Filter>
+    <ClCompile Include="Source\Steroids\Private\Process\Process.cpp">
+      <Filter>Source\Steroids\Private\Process</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Steroids\Private\Utility\AVLTree\AVLTree.cpp">
+      <Filter>Source\Steroids\Private\Utility\AVLTree</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Steroids\Private\Secure\CRC32\CRC32.cpp">
+      <Filter>Source\Steroids\Private\Secure\CRC32</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Steroids\Private\Secure\MemoryIntegrity\MemoryIntegrity.cpp">
+      <Filter>Source\Steroids\Private\Secure\MemoryIntegrity</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Steroids\Private\Utility\Result\Result.cpp">
+      <Filter>Source\Steroids\Private\Utility\Result</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Steroids\Private\Core\Core.cpp">
+      <Filter>Source\Steroids\Private\Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Steroids\Public\DriverEntry.h">
       <Filter>Source\Steroids\Public</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Steroids\Public\Bootstrap\Bootsrap.h">
+    <ClInclude Include="Source\Steroids\Public\Bootstrap\Bootstrap.h">
       <Filter>Source\Steroids\Public\Bootstrap</Filter>
     </ClInclude>
     <ClInclude Include="Source\Steroids\Public\Transmit\Transmit.h">
       <Filter>Source\Steroids\Public\Transmit</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Utility\AVLTree\Public\AVLTree.h">
-      <Filter>Source\Utility\AVLTree\Public</Filter>
+    <ClInclude Include="Source\Steroids\Public\Process\Process.h">
+      <Filter>Source\Steroids\Public\Process</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Core\Public\Core.h">
-      <Filter>Source\Core\Public</Filter>
+    <ClInclude Include="Source\Steroids\Public\Result\Result.h">
+      <Filter>Source\Steroids\Public\Utility\Result</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Steroids\Public\Core\Core.h">
+      <Filter>Source\Steroids\Public\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Steroids\Public\Utility\AVLTree\AVLTree.h">
+      <Filter>Source\Steroids\Public\Utility\AVLTree</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Steroids\Public\Secure\CRC32\CRC32.h">
+      <Filter>Source\Steroids\Public\Secure\CRC32</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Steroids\Public\Secure\MemoryIntegrity\MemoryIntegrity.h">
+      <Filter>Source\Steroids\Public\Secure\MemoryIntegrity</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
