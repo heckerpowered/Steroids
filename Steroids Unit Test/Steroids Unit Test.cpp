@@ -43,6 +43,19 @@ bool ProtectProcessFunction() noexcept {
 	return SteroidsInstance.ProtectProcess(GetCurrentProcessId()) && !TerminateProcess(OpenProcess(PROCESS_ALL_ACCESS, false, GetCurrentProcessId()), EXIT_SUCCESS);
 }
 
+bool TerminateProcessFunction() noexcept {
+	STARTUPINFO StartupInfo{};
+	PROCESS_INFORMATION ProcessInformation{};
+	if (!CreateProcessA("cmd.exe", nullptr, nullptr, nullptr, false, 0, nullptr, nullptr, &StartupInfo, &ProcessInformation)) [[unlikely]] {
+		return false;
+	}
+
+	CloseHandle(ProcessInformation.hThread);
+	CloseHandle(ProcessInformation.hProcess);
+
+	return SteroidsInstance.TerminateProcess(ProcessInformation.dwProcessId);
+}
+
 class Type {
 public:
 	void Function() {
@@ -58,6 +71,7 @@ int main() {
 	ReportFunction("Is Steroids Available", SteroidsInstance.IsAvailable());
 	ReportFunction("Read Process Memory", ReadProcessMemoryFunction());
 	ReportFunction("Protect Process", ProtectProcessFunction());
+	ReportFunction("TerminateProcess", TerminateProcessFunction());
 	ReportFunction("Finalize Steroids", SteroidsInstance.Stop());
 
 	static_cast<void>(getchar());
