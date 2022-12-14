@@ -46,7 +46,9 @@ bool ProtectProcessFunction() noexcept {
 bool TerminateProcessFunction() noexcept {
 	STARTUPINFO StartupInfo{};
 	PROCESS_INFORMATION ProcessInformation{};
-	if (!CreateProcessA("cmd.exe", nullptr, nullptr, nullptr, false, 0, nullptr, nullptr, &StartupInfo, &ProcessInformation)) [[unlikely]] {
+
+	std::string Commandline = "cmd \\k";
+	if (!CreateProcessA(nullptr, Commandline.data(), nullptr, nullptr, false, CREATE_NO_WINDOW, nullptr, nullptr, &StartupInfo, &ProcessInformation)) [[unlikely]] {
 		return false;
 	}
 

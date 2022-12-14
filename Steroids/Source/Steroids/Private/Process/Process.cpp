@@ -344,7 +344,7 @@ Result<Process> Process::GetProcessById(HANDLE const ProcessID) noexcept {
 NTSTATUS Process::Terminate() noexcept {
     // Open process handle
     HANDLE ProcessHandle;
-    NTSTATUS Status = ObOpenObjectByPointer(&ProcessObject, OBJ_KERNEL_HANDLE, nullptr, PROCESS_ALL_ACCESS, *PsProcessType, MODE::KernelMode, &ProcessHandle);
+    NTSTATUS Status = ObOpenObjectByPointer(ProcessObject, OBJ_KERNEL_HANDLE, nullptr, PROCESS_ALL_ACCESS, *PsProcessType, MODE::KernelMode, &ProcessHandle);
     if (!NT_SUCCESS(Status)) [[unlikely]] {
         return Status;
     }

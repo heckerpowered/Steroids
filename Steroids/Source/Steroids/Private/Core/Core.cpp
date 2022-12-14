@@ -68,7 +68,7 @@ inline void* __cdecl operator new(SIZE_T Size)
 	if (p == nullptr) [[unlikely]] {
 		KernelRaiseException(MUST_SUCCEED_POOL_EMPTY);
 	}
-
+		
 	return p;
 }
 
