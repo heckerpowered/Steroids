@@ -21,74 +21,69 @@
 #include <format>
 #include <sstream>
 
-#include "Steroids Core.hpp"
+#include "Steroids Core.h"
+#include "SteroidsFunctionCode.h"
+#include "SteroidsFunction.h"
 
-_Struct_size_bytes_(sizeof(ReadProcessMemoryFunction))
-struct ReadProcessMemoryFunction {
-	/** An id to the process with the memory that is being read */
-	SProcessId ProcessId;
+ /** Called when the Steroids is constructing */
+Steroids::Steroids() noexcept : SteroidsHandle(INVALID_HANDLE_VALUE) {
+	// Do nothing
+}
 
-	/** A pointer to the base address in the specified process from which to read.
-		Before any data transfer occurs, the system verifies that all data in the
-		base address and memory of the specified size is accessible for read access,
-		and if it is not accessible the function fails */
-	PVOID const BaseAddress;
+/** Called when the Steroids is deconstructing */
+Steroids::~Steroids() noexcept {
+	// Try to close Steroids's file handle
+	CloseHandle(SteroidsHandle);
+}
 
-	/** A pointer to a buffer that receives the contents from the address space of the specified process */
-	PVOID Buffer;
-
-	/** The number of bytes to be read from the specified process */
-	SIZE_T Size;
-
-	/** A pointer to a variable that receives the number of bytes transferred into the specified buffer,
-		If NumberOfBytesRead is null, the parameter is ignored */
-	SIZE_T* NumberOfBytesRead;
-};
-
-HANDLE SteroidsHandle = INVALID_HANDLE_VALUE;
-
-extern "C" EXPORT bool InitializeSteroids() noexcept {
+bool Steroids::Initialize() noexcept {
 	if (SteroidsHandle != INVALID_HANDLE_VALUE) {
 		return true;
 	}
-	
+
 	SteroidsHandle = CreateFileA("\\\\.\\Steroids", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
 	if (SteroidsHandle == INVALID_HANDLE_VALUE) [[unlikely]] {
-		auto const serviceManager = OpenSCManagerA(nullptr, nullptr, SC_MANAGER_ALL_ACCESS);
-		if (serviceManager == nullptr) [[unlikely]] {
+		SC_HANDLE const ServiceManager = OpenSCManagerA(nullptr, nullptr, SC_MANAGER_ALL_ACCESS);
+		if (ServiceManager == nullptr) [[unlikely]] {
 			return false;
 		}
 
-		constexpr auto serviceName = "Steroids";
-		auto service = OpenServiceA(serviceManager, serviceName, SERVICE_ALL_ACCESS);
-		if (service == nullptr) [[unlikely]] {
-			std::string buffer;
-			buffer.resize(GetCurrentDirectoryA(0, nullptr));
-			buffer.resize(GetCurrentDirectoryA(static_cast<DWORD>(buffer.size()), buffer.data()));
+		constexpr auto ServiceName = "Steroids";
+		SC_HANDLE Service = OpenServiceA(ServiceManager, ServiceName, SERVICE_ALL_ACCESS);
+		if (Service == nullptr) [[unlikely]] {
+			std::string Buffer;
+			Buffer.resize(GetCurrentDirectoryA(0, nullptr));
+			Buffer.resize(GetCurrentDirectoryA(static_cast<DWORD>(Buffer.size()), Buffer.data()));
 
-			std::stringstream stream;
-			stream.str().resize(buffer.size() + 13);
-			stream << buffer << '\\' << "Steroids.sys";
+			std::stringstream Stream;
+			Stream.str().resize(Buffer.size() + 13);
+			Stream << Buffer << '\\' << "Steroids.sys";
 
-			service = CreateServiceA(serviceManager, serviceName, serviceName, SERVICE_ALL_ACCESS, SERVICE_KERNEL_DRIVER, SERVICE_DEMAND_START,
-				SERVICE_ERROR_IGNORE, stream.str().data(), nullptr, nullptr, nullptr, nullptr, nullptr);
-			if (service == nullptr)
-			{
-				CloseServiceHandle(serviceManager);
+			Service = CreateServiceA(ServiceManager, ServiceName, ServiceName, SERVICE_ALL_ACCESS, SERVICE_KERNEL_DRIVER, SERVICE_DEMAND_START,
+				SERVICE_ERROR_IGNORE, Stream.str().data(), nullptr, nullptr, nullptr, nullptr, nullptr);
+			if (Service == nullptr) [[unlikely]] {
+				CloseServiceHandle(ServiceManager);
 				return false;
 			}
 		}
 
-		auto const status = StartServiceA(service, 0, 0);
-		SteroidsHandle = CreateFileA("\\\\.\\Steroids", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
-		return status && (SteroidsHandle != INVALID_HANDLE_VALUE);
+		bool const Status = StartServiceA(Service, 0, 0);
+		SteroidsHandle = CreateFileA("\\\\.\\Steroids", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING,
+			FILE_ATTRIBUTE_NORMAL, nullptr);
+		return Status && (SteroidsHandle != INVALID_HANDLE_VALUE);
 	}
 
 	return true;
 }
 
-extern "C" EXPORT bool FinalizeSteroids() noexcept {
-	CloseHandle(SteroidsHandle);
+bool Steroids::Stop() noexcept {
+	// Try to close Steroids' file handle
+	if (!CloseHandle(SteroidsHandle)) [[unlikely]] /* Closing Steroids's file handle will not fail under normal circumstances */ {
+		return false;
+	} 
+
+	// Invalidate 
+	SteroidsHandle = INVALID_HANDLE_VALUE;
 
 	SC_HANDLE const ServiceManager = OpenSCManagerA(nullptr, nullptr, SC_MANAGER_ALL_ACCESS);
 	if (ServiceManager == nullptr) [[unlikely]] {
@@ -99,25 +94,29 @@ extern "C" EXPORT bool FinalizeSteroids() noexcept {
 
 	[[maybe_unused]] SERVICE_STATUS ServiceStatus;
 
-	return ControlService(ServiceHandle, SERVICE_CONTROL_STOP, &ServiceStatus) &&
-		DeleteService(ServiceHandle) &&
-		CloseServiceHandle(ServiceHandle) &&
-		CloseServiceHandle(ServiceManager);
+	return ControlService(ServiceHandle, SERVICE_CONTROL_STOP, &ServiceStatus) && DeleteService(ServiceHandle) 
+		&& CloseServiceHandle(ServiceHandle) && CloseServiceHandle(ServiceManager);
 }
 
-extern "C" EXPORT bool SReadProcessMemory(SProcessId const ProcessId, PVOID const BaseAddress, PVOID Buffer, SIZE_T Size, SIZE_T* NumberOfBytesRead) noexcept
-{
-	ReadProcessMemoryFunction Function{ .ProcessId = ProcessId, .BaseAddress = BaseAddress, .Buffer = Buffer, .Size = Size, .NumberOfBytesRead = NumberOfBytesRead };
-	return DeviceIoControl(SteroidsHandle, CTL_CODE(FILE_DEVICE_UNKNOWN, 2, METHOD_IN_DIRECT, FILE_ANY_ACCESS), &Function, sizeof(ReadProcessMemoryFunction), nullptr, 0, nullptr, nullptr);
-}
-
-extern "C" EXPORT bool ProtectProcess(SProcessId ProcessId) noexcept
-{
-	return DeviceIoControl(SteroidsHandle, CTL_CODE(FILE_DEVICE_UNKNOWN, 3, METHOD_IN_DIRECT, FILE_ANY_ACCESS), &ProcessId, sizeof(ProcessId), nullptr, 0, nullptr, nullptr);;
-}
-
-extern "C" EXPORT bool IsSteroidsAvailable() noexcept {
+bool Steroids::IsAvailable() noexcept {
 	bool SteroidsAvailable{};
-	DeviceIoControl(SteroidsHandle, CTL_CODE(FILE_DEVICE_UNKNOWN, 0, METHOD_IN_DIRECT, FILE_ANY_ACCESS), nullptr, 0, &SteroidsAvailable, sizeof(bool), nullptr, nullptr);
+	DeviceIoControl(SteroidsHandle, CTL_CODE(FILE_DEVICE_UNKNOWN, static_cast<int>(SteroidsFunction::SteroidsAvailable), METHOD_IN_DIRECT, FILE_ANY_ACCESS),
+		nullptr, 0, &SteroidsAvailable, sizeof(bool), nullptr, nullptr);
 	return SteroidsAvailable;
+}
+
+bool Steroids::ReadProcessMemory(ProcessIDType const ProcessID, PVOID const BaseAddress, PVOID Buffer, SIZE_T Size, SIZE_T* NumberOfBytesRead) noexcept {
+	ReadProcessMemoryFunction Function{ .ProcessID = ProcessID, .BaseAddress = BaseAddress, .Buffer = Buffer, .Size = Size, .NumberOfBytesRead = NumberOfBytesRead };
+	return DeviceIoControl(SteroidsHandle, CTL_CODE(FILE_DEVICE_UNKNOWN, static_cast<int>(SteroidsFunction::ReadProcessMemory), METHOD_IN_DIRECT, FILE_ANY_ACCESS),
+		&Function, sizeof(ReadProcessMemoryFunction), nullptr, 0, nullptr, nullptr);
+}
+
+bool Steroids::ProtectProcess(ProcessIDType const ProcessID) noexcept {
+	return DeviceIoControl(SteroidsHandle, CTL_CODE(FILE_DEVICE_UNKNOWN, static_cast<int>(SteroidsFunction::ProtectProcess), METHOD_IN_DIRECT, FILE_ANY_ACCESS),
+		const_cast<ProcessIDType*>(&ProcessID), sizeof(ProcessID), nullptr, 0, nullptr, nullptr);
+}
+
+bool Steroids::TerminateProcess(ProcessIDType const ProcessID) noexcept {
+	return DeviceIoControl(SteroidsHandle, CTL_CODE(FILE_DEVICE_UNKNOWN, static_cast<int>(SteroidsFunction::TerminateProcess), METHOD_IN_DIRECT, FILE_ANY_ACCESS),
+		const_cast<ProcessIDType*>(&ProcessID), sizeof(ProcessID), nullptr, 0, nullptr, nullptr);
 }

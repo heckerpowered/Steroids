@@ -13,9 +13,15 @@
     <ClCompile Include="Steroids Core.cpp">
       <Filter>Private</Filter>
     </ClCompile>
+    <ClCompile Include="SteroidsFunction.h">
+      <Filter>Public</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Steroids Core.hpp">
+    <ClInclude Include="Steroids Core.h">
+      <Filter>Public</Filter>
+    </ClInclude>
+    <ClInclude Include="SteroidsFunctionCode.h">
       <Filter>Public</Filter>
     </ClInclude>
   </ItemGroup>

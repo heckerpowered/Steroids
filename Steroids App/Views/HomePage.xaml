@@ -5,12 +5,16 @@
     xmlns:local="using:SteroidsApp.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
     mc:Ignorable="d">
 
-    <Grid Margin="56">
-        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-            <ProgressRing Name="SteamBusy" IsActive="True" Width="100" Height="100"/>
-            <Button Style="{StaticResource ButtonRevealStyle}" Margin="0,12,0,0" Content="Launch Steroids"/>
+    <Grid Margin="16">
+        <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top">
+            <Button Margin="0,12,0,0" Content="加载驱动"/>
+            <Button Margin="0,12,0,0" Content="卸载驱动"/>
+            <Button Margin="0,12,0,0" Content="运行单元测试"/>
+            <muxc:InfoBar Margin="0,12,0,0" Severity="Warning" Title="注意" IsOpen="True" IsClosable="True"
+                          Message="Steroids是相当稳定的，并且在通常情况下不会导致系统崩溃。运行单元测试可测试哪些功能目前可用。"/>
         </StackPanel>
     </Grid>
 </Page>

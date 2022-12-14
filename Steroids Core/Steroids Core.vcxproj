@@ -206,9 +206,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Steroids Core.cpp" />
+    <ClCompile Include="SteroidsFunction.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Steroids Core.hpp" />
+    <ClInclude Include="Steroids Core.h" />
+    <ClInclude Include="SteroidsFunctionCode.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

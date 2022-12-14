@@ -25,27 +25,25 @@ template<typename T>
 struct Result {
 
 private:
-	struct NontrivialDummyType {
-		constexpr NontrivialDummyType() noexcept {
-			// This default constructor is user-provided to avoid zero-initialization when objects are value-initialized
-		}
-	};
-
-	union {
-		T Value;
-		NontrivialDummyType Dummy;
-	};
-
 	NTSTATUS Status;
+	std::optional<T> Value;
 
 public:
 
-	constexpr Result(NTSTATUS const Status) noexcept : Status(Status), Dummy() {}
-	constexpr Result(T&& Value) noexcept : Status(STATUS_SUCCESS), Value(std::forward<T>(Value)) {}
-	constexpr ~Result() noexcept {}
+	constexpr Result(NTSTATUS const Status) noexcept : Status(Status) {}
+	constexpr Result(T const& Value) noexcept : Status(STATUS_SUCCESS), Value(std::forward<T>(Value)) {}
+	constexpr Result(T&& Value) noexcept : Status(STATUS_SUCCESS), Value(std::move(Value)) {};
+
+	constexpr Result() noexcept = delete;
+	constexpr ~Result() noexcept = default;
+
+	constexpr Result(Result const& Other) noexcept = delete;
+	constexpr Result(Result&& Other) noexcept = delete;
+	constexpr Result& operator=(Result const& Other) = delete;
+	constexpr Result& operator=(Result&& Other) = delete;
 
 	constexpr T& GetValue() noexcept {
-		return Value;
+		return Value.value();
 	}
 
 	constexpr NTSTATUS GetStatus() const noexcept {
@@ -77,25 +75,12 @@ public:
 		return NT_SUCCESS(GetStatus());
 	}
 
-	template<typename T>
-	constexpr NTSTATUS IfSuccess(T&& Function) noexcept {
+	template<typename FunctionType>
+	constexpr NTSTATUS IfSuccess(FunctionType&& Function) noexcept {
 		if (IsSuccess()) {
-			std::invoke(Function, GetValue());
+			return std::invoke(Function, GetValue());
 		}
 
 		return GetStatus();
 	}
-};
-
-template<bool Const, typename Class, typename Function>
-struct MemberFunctionReference;
-
-template<typename Class, typename RetType, typename... ArgTypes>
-struct MemberFunctionReference<false, Class, RetType(ArgTypes...)> {
-	using Type = RetType(Class::*&)(ArgTypes...);
-};
-
-template<typename Class, typename RetType, typename... ArgTypes>
-struct MemberFunctionReference<true, Class, RetType(ArgTypes...)> {
-	using Type = RetType(Class::*&)(ArgTypes...) const;
 };

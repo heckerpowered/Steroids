@@ -18,8 +18,11 @@
  */
 
 #include "Core/Core.h"
+#include "exception"
 
 #pragma warning(disable: 4595)
+#pragma warning(disable: 28301)
+#pragma warning(disable: 28253)
 
 _IRQL_requires_max_(DISPATCH_LEVEL)
 inline void __cdecl operator delete(_Pre_notnull_ __drv_freesMem(Mem) void* p) noexcept {
@@ -70,13 +73,15 @@ inline void* __cdecl operator new(SIZE_T Size)
 }
 
 #pragma warning(default: 4595)
+#pragma warning(default: 28301)
+#pragma warning(default: 28253)
 
 inline __declspec(noreturn) void __cdecl _invalid_parameter_noinfo_noreturn()
 {
 	KernelRaiseException(KMODE_EXCEPTION_NOT_HANDLED);
 }
 
-__declspec(noreturn) inline void __cdecl _invoke_watson(_In_opt_z_ wchar_t const* const expression [[maybe_unused]],
+__declspec(noreturn) void __cdecl _invoke_watson(_In_opt_z_ wchar_t const* const expression [[maybe_unused]],
 	_In_opt_z_ wchar_t const* const function_name [[maybe_unused]], _In_opt_z_ wchar_t const* const file_name [[maybe_unused]],
 	_In_ unsigned int const line_number [[maybe_unused]], _In_ uintptr_t const reserved [[maybe_unused]] )
 {
@@ -119,4 +124,6 @@ namespace std
 	{
 		KernelRaiseException(KMODE_EXCEPTION_NOT_HANDLED);
 	}
+
+	void(__cdecl* std::_Raise_handler)(class stdext::exception const&);
 }

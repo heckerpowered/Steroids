@@ -290,7 +290,7 @@ struct SYSTEM_PROCESS_INFORMATION {
     LARGE_INTEGER KernelTime;
     UNICODE_STRING ProcessName;
     KPRIORITY BasePriority;
-    ULONG ProcessId;
+    ULONG ProcessID;
     ULONG InheritedFromProcessId;
     ULONG HandleCount;
     ULONG Reserved2[2];
@@ -310,10 +310,8 @@ NtQuerySystemInformation(_In_ SYSTEM_INFORMATION_CLASS SystemInformationClass,
     _Out_opt_ PULONG ReturnLength);
 
 Process::Process(PEPROCESS const Process) noexcept : ProcessObject(Process)  {}
-Process::Process(Process const& Other) noexcept : ProcessObject(Other.ProcessObject) { }
-Process::Process(Process&& Other) noexcept : ProcessObject(Other.ProcessObject) {
-    Other.ProcessObject = nullptr; 
-}
+Process::Process(Process const& Other) noexcept : ProcessObject(Other.ProcessObject) {}
+Process::Process(Process&& Other) noexcept : ProcessObject(Other.ProcessObject) { Other.ProcessObject = nullptr; }
 
 Process& Process::operator=(Process const& Other) noexcept {
     ProcessObject = Other.ProcessObject;
@@ -321,34 +319,43 @@ Process& Process::operator=(Process const& Other) noexcept {
 }
 
 Process& Process::operator=(Process&& Other) noexcept {
-    ProcessObject = Other.ProcessObject; 
-    return *this; 
+    ProcessObject = Other.ProcessObject;
+    return *this;
 }
 
 Process::~Process() noexcept {
-    if (ProcessObject != nullptr) {
+    if (ProcessObject != nullptr) [[unlikely]] {
         ObDereferenceObjectDeferDelete(ProcessObject);
     }
 }
 
-Result<Process> Process::GetProcessById(HANDLE const ProcessId) noexcept {
+Result<Process> Process::GetProcessById(HANDLE const ProcessID) noexcept {
+    using RetType = Result<Process>;
+
     PEPROCESS Process;
-    NTSTATUS const Status = PsLookupProcessByProcessId(ProcessId, &Process);
+    NTSTATUS const Status = PsLookupProcessByProcessId(ProcessID, &Process);
     if (!NT_SUCCESS(Status)) [[unlikely]] {
-        return { Status };
+        return RetType(Status);
     }
 
-    return { Process };
+    return RetType(Process);
 }
 
 NTSTATUS Process::Terminate() noexcept {
     // Open process handle
     HANDLE ProcessHandle;
     NTSTATUS Status = ObOpenObjectByPointer(&ProcessObject, OBJ_KERNEL_HANDLE, nullptr, PROCESS_ALL_ACCESS, *PsProcessType, MODE::KernelMode, &ProcessHandle);
+    if (!NT_SUCCESS(Status)) [[unlikely]] {
+        return Status;
+    }
 
     // Terminate Process
     Status = ZwTerminateProcess(ProcessHandle, 0);
-    if (!NT_SUCCESS(Status)) [[unlikely]] {
+
+    // When you terminates a process with ZwTerminateProcess function, you do not need to
+    // use ZwClose function to close the process handle. Because any handle related to the
+    // process will be closed after the process is terminated.
+    if (!NT_SUCCESS(Status)) {
         NT_VERIFY(NT_SUCCESS(ZwClose(ProcessHandle)));
     }
 

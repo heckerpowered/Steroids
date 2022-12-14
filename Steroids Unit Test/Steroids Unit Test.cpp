@@ -3,7 +3,9 @@
 #include <random>
 #include <optional>
 
-#include "../Steroids Core/Steroids Core.hpp"
+#include "../Steroids Core/Steroids Core.h"
+
+Steroids SteroidsInstance;
 
 void ReportFunction(char const* FunctionName, bool const Success) noexcept {
 	if (Success) [[likely]] {
@@ -34,11 +36,11 @@ bool ReadProcessMemoryFunction() noexcept {
 	int Value = Distribution(Engine);
 	int ReadValue{};
 
-	return SReadProcessMemory(GetCurrentProcessId(), &Value, &ReadValue, sizeof(Value), nullptr) && (Value == ReadValue);
+	return SteroidsInstance.ReadProcessMemory(GetCurrentProcessId(), &Value, &ReadValue, sizeof(Value), nullptr) && (Value == ReadValue);
 }
 
 bool ProtectProcessFunction() noexcept {
-	return ProtectProcess(GetCurrentProcessId()) && !TerminateProcess(OpenProcess(PROCESS_ALL_ACCESS, false, GetCurrentProcessId()), EXIT_SUCCESS);
+	return SteroidsInstance.ProtectProcess(GetCurrentProcessId()) && !TerminateProcess(OpenProcess(PROCESS_ALL_ACCESS, false, GetCurrentProcessId()), EXIT_SUCCESS);
 }
 
 class Type {
@@ -52,13 +54,11 @@ int main() {
 	std::cout.sync_with_stdio(false);
 
 	std::cout << "Steroids Unit Test 1.0.0.0" << std::endl;
-	ReportFunction("Initialize Steroids", InitializeSteroids());
-	ReportFunction("Is Steroids Available", IsSteroidsAvailable());
+	ReportFunction("Initialize Steroids", SteroidsInstance.Initialize());
+	ReportFunction("Is Steroids Available", SteroidsInstance.IsAvailable());
 	ReportFunction("Read Process Memory", ReadProcessMemoryFunction());
 	ReportFunction("Protect Process", ProtectProcessFunction());
-	ReportFunction("Finalize Steroids", FinalizeSteroids());
-
-	sizeof(std::optional<bool>);
+	ReportFunction("Finalize Steroids", SteroidsInstance.Stop());
 
 	static_cast<void>(getchar());
 }

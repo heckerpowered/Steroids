@@ -35,7 +35,6 @@ public:
     Process(Process&& Other) noexcept;
     Process& operator=(Process const& Other) noexcept;
     Process& operator=(Process&& Other) noexcept;
-
     ~Process() noexcept;
 
     static Result<Process> GetProcessById(HANDLE const ProcessId) noexcept;

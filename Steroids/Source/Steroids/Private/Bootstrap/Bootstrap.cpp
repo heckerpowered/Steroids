@@ -19,7 +19,6 @@
 
 #include "Core/Core.h"
 #include "Bootstrap/Bootstrap.h"
-#include "Utility/AVLTree/AVLTree.h"
 
 #if defined(ALLOC_PRAGMA)
 #pragma alloc_text(INIT, SteroidsInitialize)
@@ -152,10 +151,10 @@ PreOperation(
 		PEPROCESS Process = static_cast<PEPROCESS>(OperationInformation->Object);
 
 		// Get the process id of the process
-		HANDLE ProcessId = PsGetProcessId(Process);
+		HANDLE ProcessID = PsGetProcessId(Process);
 
 		// Determine if the process is being protected
-		if (RtlLookupElementGenericTableAvl(&ProcessTable, &ProcessId)) [[unlikely]] {
+		if (RtlLookupElementGenericTableAvl(&ProcessTable, &ProcessID)) [[unlikely]] {
 			// Clear access bits
 			OperationInformation->Parameters->CreateHandleInformation.DesiredAccess = 0;
 		}
@@ -165,10 +164,10 @@ PreOperation(
 		PETHREAD Thread = static_cast<PETHREAD>(OperationInformation->Object);
 
 		// Get the process id of the thread
-		HANDLE ProcessId = PsGetThreadProcessId(Thread);
+		HANDLE ProcessID = PsGetThreadProcessId(Thread);
 
 		// Determine if the process is being protected
-		if (RtlLookupElementGenericTableAvl(&ProcessTable, &ProcessId)) [[unlikely]] {
+		if (RtlLookupElementGenericTableAvl(&ProcessTable, &ProcessID)) [[unlikely]] {
 			// Clear access bits
 			OperationInformation->Parameters->CreateHandleInformation.DesiredAccess = 0;
 		}
@@ -181,16 +180,16 @@ PreOperation(
 _Use_decl_annotations_
 void
 AddProtectProcess(
-	HANDLE ProcessId
+	HANDLE ProcessID
 ) noexcept {
-	static_cast<void>(RtlInsertElementGenericTableAvl(&ProcessTable, &ProcessId, sizeof(HANDLE), nullptr));
+	static_cast<void>(RtlInsertElementGenericTableAvl(&ProcessTable, &ProcessID, sizeof(HANDLE), nullptr));
 }
 
 _Use_decl_annotations_
 void
 CreateProcessNotify(
 	HANDLE ParentId [[maybe_unused]],
-	HANDLE ProcessId,
+	HANDLE ProcessID,
 	BOOLEAN Create
 ) noexcept {
 	// Filtering process creation operations
@@ -199,8 +198,8 @@ CreateProcessNotify(
 	}
 
 	// Determine if the process is protected
-	if (RtlLookupElementGenericTableAvl(&ProcessTable, &ProcessId)) [[unlikely]] {
-		NT_VERIFY(RtlDeleteElementGenericTableAvl(&ProcessTable, &ProcessId));
+	if (RtlLookupElementGenericTableAvl(&ProcessTable, &ProcessID)) [[unlikely]] {
+		NT_VERIFY(RtlDeleteElementGenericTableAvl(&ProcessTable, &ProcessID));
 	}
 }
 

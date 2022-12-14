@@ -87,8 +87,8 @@ struct ReadProcessMemoryFunction {
 };
 
 /** Steroids function codes */
-enum class SteroidsFunction {
-	/* Returns a bool that indicates if the Steroids is available */
+enum class SteroidsFunction : int {
+	/** Returns a bool that indicates if the Steroids is available */
 	SteroidsAvailable,
 
 	/** Terminates the specificd process, requiring a process ID in 64-bit unsigned integer */

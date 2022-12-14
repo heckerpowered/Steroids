@@ -77,7 +77,7 @@ HandleTerminateProcess(
 		return STATUS_RDBSS_POST_OPERATION;
 	}
 
-	return Process::GetProcessById(ProcessId).IfSuccess([](Process& Process) { Process.Terminate(); });
+	return Process::GetProcessById(ProcessId).IfSuccess([](Process& Process) noexcept { return Process.Terminate(); });
 }
 
 _Use_decl_annotations_
@@ -91,7 +91,7 @@ HandleReadProcessMemory(
 		return STATUS_RDBSS_POST_OPERATION;
 	}
 
-	SIZE_T* NumberOfBytesRead;
+	SIZE_T* NumberOfBytesRead{};
 
 	// Determine if this parameter is null
 	if (Function.NumberOfBytesRead == nullptr) {

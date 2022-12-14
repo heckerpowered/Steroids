@@ -19,11 +19,24 @@
 
 #pragma once
 
-#include <ntifs.h>
-#include <ntddk.h>
-#include <intrin.h>
+/** Steroids function codes */
+enum class SteroidsFunction : int {
+	/* Returns a bool that indicates if the Steroids is available */
+	SteroidsAvailable,
 
-__declspec(noreturn) void __cdecl _invoke_watson(_In_opt_z_ wchar_t const* const expression [[maybe_unused]],
-	_In_opt_z_ wchar_t const* const function_name [[maybe_unused]], _In_opt_z_ wchar_t const* const file_name [[maybe_unused]],
-	_In_ unsigned int const line_number [[maybe_unused]], _In_ uintptr_t const reserved [[maybe_unused]] );
+	/** Terminates the specificd process, requiring a process ID in 64-bit unsigned integer */
+	TerminateProcess,
 
+	/** Protects the specified process, lower handle access when the process handle or handle of 
+		thread of the process is being open, requiring a process ID in 64-bit unsigned integer */
+	ProtectProcess,
+
+	/** Copies the data in the specificed address range from the address space of the specificed process
+		into the specificed buffer of the current process. requiring a ReadProcessMemoryFunction structure.
+		If the memory at the specified virtual address is not resident, this function will try to make it resident.
+		This operation ignores the protection of the memory at the specified virtual address */
+	ReadProcessMemory,
+
+	/** Writes data to an area of memory in a specified process. */
+	WriteProcessMemory
+};
